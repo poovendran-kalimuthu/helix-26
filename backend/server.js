@@ -58,9 +58,9 @@ app.use(session({
     ttl: 24 * 60 * 60 // 1 day
   }),
   cookie: {
-    secure: true, // Must be true for SameSite: none
+    secure: true, // Must be true for HTTPS
     httpOnly: true,
-    sameSite: 'none', // Critical for Vercel -> Render communication
+    sameSite: 'lax', // Now possible since we use proxying
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));

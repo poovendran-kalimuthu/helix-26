@@ -1,6 +1,6 @@
 {
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://helix-26.onrender.com/api/$1" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
