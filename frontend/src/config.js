@@ -1,6 +1,7 @@
-// Production-ready API Configuration
-// Use VITE_API_BASE_URL from .env file, or fallback to localhost during dev
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+export const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:5000' 
+  : ''; // Or another default if needed, but relative paths are also an option if served from same origin
 
-// Export API_URL for backward compatibility across the app
-export const API_URL = API_BASE_URL;
+// For Spectrum, based on previous context, we'll use localhost:5000 as default
+// but allow it to be easily changed here.
+export const API_URL = ''; 
