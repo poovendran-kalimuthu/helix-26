@@ -4,7 +4,8 @@ import axios from 'axios'
 import './index.css'
 import App from './App.jsx'
  
-// Skip ngrok browser warning for mobile testing
+// Essential for cross-site cookies between Vercel and Render
+axios.defaults.withCredentials = true;
 axios.defaults.headers.common['ngrok-skip-browser-warning'] = 'true';
 
 createRoot(document.getElementById('root')).render(
