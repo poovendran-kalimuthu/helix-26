@@ -4,6 +4,7 @@ import cors from 'cors';
 import session from 'express-session';
 import passport from 'passport';
 import connectDB from './config/db.js';
+import MongoStore from 'connect-mongo';
 
 // Load env vars
 dotenv.config();
@@ -42,9 +43,14 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(session({
   secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false, // Don't create session until something is stored
+  saveUninitialized: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions',
+    ttl: 24 * 60 * 60 // 1 day
+  }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // true if https
+    secure: process.env.NODE_ENV === 'production',
     httpOnly: true,
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
