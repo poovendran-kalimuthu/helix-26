@@ -50,12 +50,12 @@ const CompleteProfile = () => {
 
           <div className="form-group">
             <label className="form-label">Full Name *</label>
-            <input className="form-input" type="text" name="name" required value={formData.name} onChange={handleChange} placeholder="e.g. Hari Poovendran" />
+            <input className="form-input" type="text" name="name" required value={formData.name} onChange={handleChange} placeholder="Full Name" />
           </div>
 
           <div className="form-group">
             <label className="form-label">Register / Roll Number *</label>
-            <input className="form-input" type="text" name="registerNumber" required value={formData.registerNumber} onChange={handleChange} placeholder="e.g. 21BCE0001" />
+            <input className="form-input" type="text" name="registerNumber" required value={formData.registerNumber} onChange={handleChange} placeholder="e.g.727624BEC001" />
           </div>
 
           <div className="cp-form-row">

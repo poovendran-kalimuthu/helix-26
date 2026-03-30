@@ -29,10 +29,22 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Enable CORS
+const allowedOrigins = [
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:5000'
+];
+
 app.use(cors({
-  origin: process.env.FRONTEND_URL,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, process.env.FRONTEND_URL); 
+    }
+  },
   methods: 'GET,POST,PUT,PATCH,DELETE',
-  credentials: true, // Allow session cookies from browser to pass through
+  credentials: true,
 }));
 
 // Body parser

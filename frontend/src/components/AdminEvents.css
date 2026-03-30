@@ -12,7 +12,7 @@
 /* Toast */
 .ae-toast {
   position: fixed;
-  bottom: 2rem;
+  top: 80px;
   right: 2rem;
   z-index: 9999;
   min-width: 240px;
@@ -776,7 +776,8 @@
   .ae-criteria-row .form-input { width: 100% !important; }
 
   .ae-toast {
-    bottom: 1rem;
+    top: 70px;
+    bottom: auto;
     left: 1rem;
     right: 1rem;
     min-width: auto;
