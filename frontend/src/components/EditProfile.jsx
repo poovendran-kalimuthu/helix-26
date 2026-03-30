@@ -5,13 +5,13 @@ import Loader from './Loader';
 import { API_URL } from '../config';
 import './CompleteProfile.css';
 
-const DEPARTMENTS = ['ACT', 'VLSI', 'AIML', 'AIDS', 'CYBER', 'AUTO'];
+const DEPARTMENTS = ['CSE', 'ECE', 'EEE', 'MECH', 'IT', 'CIVIL', 'ACT', 'VLSI', 'AIML', 'AIDS', 'CYBER', 'AUTO'];
 const YEARS = ['Second', 'Third'];
 
 const EditProfile = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: '', registerNumber: '', department: 'ACT', year: 'Second', section: '', mobile: '', alternateEmail: '' });
+  const [formData, setFormData] = useState({ name: '', registerNumber: '', department: 'CSE', year: 'Second', section: '', mobile: '', alternateEmail: '' });
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [error, setError] = useState('');
@@ -33,7 +33,7 @@ const EditProfile = () => {
   const populate = u => setFormData({ 
     name: u.name || '',
     registerNumber: u.registerNumber || '', 
-    department: u.department || 'ACT', 
+    department: u.department || 'CSE', 
     year: u.year || 'Second', 
     section: u.section || '', 
     mobile: u.mobile || '', 
