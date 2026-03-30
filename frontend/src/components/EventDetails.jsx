@@ -197,14 +197,14 @@ const EventDetails = () => {
   const availableInviteSlots = totalSlots - currentMembersCount - selectedTeammates.length;
 
   const filteredUsers = searchTerm.trim() === '' ? [] : usersList.filter(u => {
-    const isRegInCurrentTeam = registration?.members.some(m => m.user._id === u._id);
+    const isRegInCurrentTeam = registration?.members.some(m => m.user?._id === u._id);
     const isSelected = selectedTeammates.includes(u._id);
 
     // Hide if already in current team or already selected or is current user
     if (isRegInCurrentTeam || isSelected || u._id === currentUser?._id) return false;
 
     const searchLower = searchTerm.toLowerCase();
-    return u.name.toLowerCase().includes(searchLower) || (u.registerNumber && u.registerNumber.toLowerCase().includes(searchLower));
+    return (u?.name || '').toLowerCase().includes(searchLower) || (u?.registerNumber && u.registerNumber.toLowerCase().includes(searchLower));
   }).slice(0, 5);
 
   return (

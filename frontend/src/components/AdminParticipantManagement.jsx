@@ -78,8 +78,8 @@ const AdminParticipantManagement = () => {
     const q = search.toLowerCase();
     const matchesSearch =
       (reg.teamName || '').toLowerCase().includes(q) ||
-      reg.teamLeader.name.toLowerCase().includes(q) ||
-      reg.teamLeader.registerNumber.toLowerCase().includes(q);
+      (reg.teamLeader?.name || '').toLowerCase().includes(q) ||
+      (reg.teamLeader?.registerNumber || '').toLowerCase().includes(q);
     if (!matchesSearch) return false;
     if (activeTab === 'all') return !reg.isShortlisted && reg.currentRound === 0 && !reg.isDisqualified;
     if (activeTab === 'shortlisted') return reg.isShortlisted && !reg.isDisqualified;
@@ -457,9 +457,9 @@ const AdminParticipantManagement = () => {
                     </td>
                     <td className="hide-mobile" data-label="Leader">
                       <div className="ae-leader-info">
-                        <strong>{reg.teamLeader.name}</strong>
-                        <code>{reg.teamLeader.registerNumber}</code>
-                        <small>{reg.teamLeader.department}</small>
+                        <strong>{reg.teamLeader?.name || 'Unknown'}</strong>
+                        <code>{reg.teamLeader?.registerNumber || 'N/A'}</code>
+                        <small>{reg.teamLeader?.department || '—'}</small>
                       </div>
                     </td>
                     {isJuryRound && (

@@ -5,7 +5,7 @@ import Loader from './Loader';
 import { API_URL } from '../config';
 import './CompleteProfile.css';
 
-const DEPARTMENTS = ['CSE','AIDS','AIML', 'CYS' ,'ECE', 'MECH', 'CIVIL', 'EEE', 'IT', 'OTHER'];
+const DEPARTMENTS = ['CSE','AIDS','AIML', 'CYS' ,'ECE', 'ACT','MECH', 'CIVIL', 'EEE','VLSI', 'IT'];
 const YEARS = ['Second', 'Third', ];
 
 const CompleteProfile = () => {
