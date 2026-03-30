@@ -30,21 +30,16 @@ app.set('trust proxy', 1);
 
 // Enable CORS
 const allowedOrigins = [
-  process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL?.replace(/\/$/, ''), // Remove trailing slash if present
   'http://localhost:5173',
   'http://localhost:5000'
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(null, process.env.FRONTEND_URL); 
-    }
-  },
+  origin: allowedOrigins,
   methods: 'GET,POST,PUT,PATCH,DELETE',
   credentials: true,
+  exposedHeaders: ['set-cookie']
 }));
 
 // Body parser
@@ -62,9 +57,9 @@ app.use(session({
     ttl: 24 * 60 * 60 // 1 day
   }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production',
+    secure: true, // Must be true for SameSite: none
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // Needed for cross-site cookies
+    sameSite: 'none', // Critical for Vercel -> Render communication
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));
