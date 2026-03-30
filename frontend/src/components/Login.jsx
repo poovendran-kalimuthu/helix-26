@@ -1,25 +1,33 @@
-import React, { useState } from 'react';
+import { Shield, Zap, Users, Radio, Layers, MoveRight } from 'lucide-react';
 import './Login.css';
 import Loader from './Loader';
 import { API_URL } from '../config';
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
+  const [showTip, setShowTip] = useState(false);
 
+  // Show a 'cold start' tip if redirect takes too long (Render free tier)
   const handleLogin = () => {
     setLoading(true);
+    setTimeout(() => setShowTip(true), 8000); // 8 seconds delay
     window.location.href = `${API_URL}/api/auth/google`;
   };
 
   return (
     <div className="ln-wrapper">
-      {loading && <Loader fullScreen text="Redirecting to Google..." />}
+      {loading && (
+        <Loader 
+          fullScreen 
+          text={showTip ? "Waking up server... (Render free tier takes ~30s)" : "Redirecting to Google..."} 
+        />
+      )}
 
       {/* Left Panel */}
       <div className="ln-left animate-fade-in">
         <div className="ln-brand">
           <div className="ln-logo">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+            <Layers size={22} color="white" strokeWidth={2} />
           </div>
           <span>Spectrum</span>
         </div>
@@ -36,9 +44,9 @@ const Login = () => {
 
           <div className="ln-features animate-fade-in-up stagger-4">
             {[
-              { icon: '⚡', title: 'Instant Registration', desc: 'Sign up for events in seconds' },
-              { icon: '👥', title: 'Team Builder', desc: 'Find teammates by roll number' },
-              { icon: '📢', title: 'Live Updates', desc: 'Admin-powered event management' },
+              { icon: <Zap size={18} />, title: 'Instant Registration', desc: 'Sign up for events in seconds' },
+              { icon: <Users size={18} />, title: 'Team Builder', desc: 'Find teammates by roll number' },
+              { icon: <Radio size={18} />, title: 'Live Updates', desc: 'Admin-powered event management' },
             ].map((f, i) => (
               <div key={i} className="ln-feature">
                 <div className="ln-feature-icon">{f.icon}</div>
@@ -61,7 +69,7 @@ const Login = () => {
         <div className="ln-card glass-strong animate-scale-in">
           <div className="ln-card-header">
             <div className="ln-card-logo">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="1.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+              <Layers size={28} color="white" strokeWidth={1.5} />
             </div>
             <h2>Welcome back</h2>
             <p>Sign in to your Spectrum account</p>

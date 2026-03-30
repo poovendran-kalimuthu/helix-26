@@ -5,8 +5,8 @@ import Loader from './Loader';
 import { API_URL } from '../config';
 import './CompleteProfile.css';
 
-const DEPARTMENTS = ['CSE', 'ECE', 'MECH', 'CIVIL', 'EEE', 'IT', 'OTHER'];
-const YEARS = ['1st', '2nd', '3rd', '4th'];
+const DEPARTMENTS = ['CSE','AIDS','AIML', 'CYS' ,'ECE', 'MECH', 'CIVIL', 'EEE', 'IT', 'OTHER'];
+const YEARS = ['Second', 'Third', ];
 
 const CompleteProfile = () => {
   const [formData, setFormData] = useState({
