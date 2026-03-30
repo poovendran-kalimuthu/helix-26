@@ -139,6 +139,66 @@
   background: linear-gradient(90deg, var(--clr-accent), var(--clr-secondary));
 }
 
+.ae-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 2rem;
+  margin-bottom: 2rem;
+  border-radius: var(--radius-lg);
+  gap: 1.5rem;
+  flex-wrap: nowrap; /* Keep items in a row on desktop */
+}
+
+.ae-header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.ae-header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  flex: 1;
+}
+
+.ae-search-box {
+  display: flex;
+  align-items: center;
+  background: var(--clr-surface-2);
+  border: 1px solid var(--clr-border-subtle);
+  border-radius: var(--radius-md);
+  padding: 2px;
+  gap: 0;
+  max-width: 400px;
+  flex: 1;
+}
+
+.ae-search-box select {
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--clr-border-subtle);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  color: var(--clr-text);
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  outline: none;
+  cursor: pointer;
+  min-width: 130px;
+}
+
+.ae-search-box .form-input {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 8px 12px;
+  font-size: 0.9rem;
+  width: 100%;
+}
+
 .ae-form-card h2 {
   font-size: 1.5rem;
   margin-bottom: 2rem;
@@ -711,13 +771,40 @@
   .ae-wrapper { padding: 1rem; gap: 1rem; }
 
   .ae-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
     padding: 1rem;
+    gap: 1rem;
+    flex-direction: column;
+    align-items: stretch;
   }
-  .ae-header-right { width: 100%; gap: 0.5rem; }
-  .ae-header-right .ae-search-box { flex: 1; }
+
+  .ae-header-left {
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .ae-header-right { 
+    width: 100%; 
+    gap: 0.5rem; 
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .ae-search-box { 
+    width: 100%; 
+    flex-direction: column;
+    background: transparent;
+    border: none;
+    padding: 0;
+  }
+  
+  .ae-search-box select,
+  .ae-search-box input {
+    width: 100% !important;
+    background: var(--clr-surface-2) !important;
+    border: 1px solid var(--clr-border-subtle) !important;
+    border-radius: var(--radius-md) !important;
+    margin: 0 !important;
+  }
 
   .ae-table thead { display: none; }
 

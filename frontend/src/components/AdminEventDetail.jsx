@@ -12,11 +12,20 @@ const AdminEventDetail = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({});
+  const [user, setUser] = useState(null);
   const [toast, setToast] = useState({ text: '', type: '' });
 
   useEffect(() => {
+    fetchUser();
     fetchEvent();
   }, [id]);
+
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/auth/login/success`, { withCredentials: true });
+      if (res.data.success) setUser(res.data.user);
+    } catch (err) { console.error("Error fetching user:", err); }
+  };
 
   const showToast = (text, type = 'success') => {
     setToast({ text, type });
@@ -190,10 +199,12 @@ const AdminEventDetail = () => {
           <h1 className="ae-title">Edit Event: {event?.title}</h1>
         </div>
         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-          <button className="btn btn-danger" onClick={handleDelete} disabled={submitting}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
-            Delete
-          </button>
+          {user?.role === 'admin' && (
+            <button className="btn btn-danger" onClick={handleDelete} disabled={submitting}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+              Delete
+            </button>
+          )}
           <button className="btn btn-accent" onClick={() => navigate(`/admin/events/${id}/participants`)}>
             Manage Participants & Rounds
           </button>
@@ -206,7 +217,8 @@ const AdminEventDetail = () => {
         </div>
       ) : (
         <div className="ae-form-card glass animate-fade-in ae-form-container">
-        <form onSubmit={handleSubmit} className="ae-form">
+        <form onSubmit={handleSubmit} className={`ae-form ${user?.role === 'coordinator' ? 'ae-form-readonly' : ''}`}>
+          <fieldset disabled={user?.role === 'coordinator'} style={{ border: 'none', padding: 0, margin: 0 }}>
           <div className="ae-form-row">
             <div className="form-group" style={{ flex: 2 }}>
               <label className="form-label">Event Title *</label>
@@ -363,10 +375,13 @@ const AdminEventDetail = () => {
     ))}
   </div>
 
-  <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: '20px' }} disabled={submitting}>
-    {submitting ? 'Saving Changes...' : 'Update Event Details'}
-  </button>
-          </form>
+  {user?.role === 'admin' && (
+    <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%', marginTop: '20px' }} disabled={submitting}>
+      {submitting ? 'Saving Changes...' : 'Update Event Details'}
+    </button>
+  )}
+  </fieldset>
+  </form>
         </div>
       )}
     </div>

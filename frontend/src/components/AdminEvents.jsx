@@ -91,10 +91,11 @@ const AdminEvents = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [formData, setFormData] = useState(EMPTY_FORM);
+  const [user, setUser] = useState(null);
   const [toast, setToast] = useState({ text: '', type: '' });
 
   useEffect(() => { 
+    fetchUser();
     fetchEvents(); 
   }, []);
 
@@ -111,6 +112,13 @@ const AdminEvents = () => {
     } catch (err) {
       setError(err.response?.status === 403 ? 'Access Denied. Admin privileges required.' : 'Failed to load events.');
     } finally { setLoading(false); }
+  };
+
+  const fetchUser = async () => {
+    try {
+      const res = await axios.get(`${API_URL}/api/auth/login/success`, { withCredentials: true });
+      if (res.data.success) setUser(res.data.user);
+    } catch (err) { console.error("Error fetching user:", err); }
   };
 
   const handleInputChange = e => {
@@ -201,19 +209,21 @@ const AdminEvents = () => {
             <p className="ae-subtitle">{events.length} event{events.length !== 1 ? 's' : ''} total</p>
           </div>
         </div>
-        <button 
-          className={`btn ${showCreateForm ? 'btn-ghost' : 'btn-primary'}`} 
-          onClick={() => { 
-            setShowCreateForm(!showCreateForm); 
-            setFormData(EMPTY_FORM); 
-          }}
-        >
-          {showCreateForm ? (
-            <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel</>
-          ) : (
-            <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Event</>
-          )}
-        </button>
+        {user?.role === 'admin' && (
+          <button 
+            className={`btn ${showCreateForm ? 'btn-ghost' : 'btn-primary'}`} 
+            onClick={() => { 
+              setShowCreateForm(!showCreateForm); 
+              setFormData(EMPTY_FORM); 
+            }}
+          >
+            {showCreateForm ? (
+              <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel</>
+            ) : (
+              <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> New Event</>
+            )}
+          </button>
+        )}
       </header>
 
       {/* Flagship Helix Header */}

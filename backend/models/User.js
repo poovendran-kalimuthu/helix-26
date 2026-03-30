@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
   alternateEmail: { type: String },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'admin', 'coordinator'],
     default: 'user'
   }
 }, { timestamps: true });

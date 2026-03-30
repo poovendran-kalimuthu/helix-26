@@ -9,7 +9,7 @@ export default defineConfig({
     allowedHosts: true, 
     proxy: {
       '/api': {
-        target: 'https://helix-26.onrender.com',
+        target: 'http://localhost:5000',
         changeOrigin: true,
         secure: false,
       }

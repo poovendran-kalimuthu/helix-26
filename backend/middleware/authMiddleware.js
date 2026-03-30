@@ -15,3 +15,11 @@ export const adminProtect = (req, res, next) => {
   }
   res.status(403).json({ message: 'Not authorized as an administrator' });
 };
+
+// @desc    Admin or Coordinator middleware
+export const coordinatorProtect = (req, res, next) => {
+  if (req.isAuthenticated() && (req.user.role === 'admin' || req.user.role === 'coordinator')) {
+    return next();
+  }
+  res.status(403).json({ message: 'Not authorized. Admin or Coordinator role required.' });
+};

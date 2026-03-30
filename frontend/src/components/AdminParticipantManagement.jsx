@@ -5,6 +5,8 @@ import { API_URL } from '../config';
 import Loader from './Loader';
 import { QRCodeCanvas } from 'qrcode.react';
 import AttendanceScanner from './AttendanceScanner';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import './AdminEvents.css';
 
 const AdminParticipantManagement = () => {
@@ -23,6 +25,16 @@ const AdminParticipantManagement = () => {
   const [qrActive, setQrActive] = useState(false);
   const [qrSession, setQrSession] = useState(null);
   const [showAdminScanner, setShowAdminScanner] = useState(false);
+  const [selectedDept, setSelectedDept] = useState('all');
+  const [selectedSession, setSelectedSession] = useState('');
+
+  const sessionMap = {
+    'none': '9:00 AM - 4:00 PM',
+    'day1_morning': '9:00 AM - 1:00 PM',
+    'day1_afternoon': '2:00 PM - 4:00 PM',
+    'day2_morning': '9:00 AM - 1:00 PM',
+    'day2_afternoon': '2:00 PM - 4:00 PM'
+  };
 
   useEffect(() => { fetchData(); }, [id]);
 
@@ -40,7 +52,12 @@ const AdminParticipantManagement = () => {
       ]);
       if (evRes.data.success) {
         const ev = evRes.data.events.find(e => e._id === id);
-        if (ev) setEvent(ev);
+        if (ev) {
+          setEvent(ev);
+          if (!selectedSession) {
+            setSelectedSession(sessionMap[ev.session] || ev.session || 'Full Day');
+          }
+        }
       }
       if (regRes.data.success) {
         setRegistrations(regRes.data.registrations);
@@ -80,7 +97,10 @@ const AdminParticipantManagement = () => {
       (reg.teamName || '').toLowerCase().includes(q) ||
       (reg.teamLeader?.name || '').toLowerCase().includes(q) ||
       (reg.teamLeader?.registerNumber || '').toLowerCase().includes(q);
-    if (!matchesSearch) return false;
+    
+    const matchesDept = selectedDept === 'all' || reg.teamLeader?.department === selectedDept;
+
+    if (!matchesSearch || !matchesDept) return false;
     if (activeTab === 'all') return !reg.isShortlisted && reg.currentRound === 0 && !reg.isDisqualified;
     if (activeTab === 'shortlisted') return reg.isShortlisted && !reg.isDisqualified;
     if (activeTab === 'disqualified') return reg.isDisqualified;
@@ -212,6 +232,158 @@ const AdminParticipantManagement = () => {
       }
     } catch { showToast('Failed to start session.', 'error'); }
   };
+  
+  const departments = ['all', 'CSE', 'ECE', 'EEE', 'MECH', 'IT', 'CIVIL', 'ACT', 'VLSI', 'AIML', 'AIDS', 'CYBER', 'AUTO'];
+
+  const generateODList = () => {
+    const doc = new jsPDF();
+    const tableColumn = ["S.No", "Team Name", "Full Name", "Register No", "Class (Sec)", "Event Session", "Reg Time"];
+    
+    // Grouping Logic
+    // We'll use the 'registrations' for 'Entire list' but filtered by 'activeTab' 
+    // (e.g. if we are in 'shortlisted' tab, we export all shortlisted teams grouped by Year/Dept)
+    // Only export teams that are Shortlisted or in an Active Round (and not DQ)
+    const teamsToExport = registrations.filter(reg => {
+      const isActiveComp = reg.isShortlisted || reg.currentRound > 0;
+      return isActiveComp && !reg.isDisqualified;
+    });
+
+    const groupedData = {};
+    teamsToExport.forEach(reg => {
+      const year = reg.teamLeader?.year || 'Other/Unspecified';
+      const dept = reg.teamLeader?.department || 'General';
+      
+      if (!groupedData[year]) groupedData[year] = {};
+      if (!groupedData[year][dept]) groupedData[year][dept] = [];
+      groupedData[year][dept].push(reg);
+    });
+
+    const years = Object.keys(groupedData).sort();
+
+    // Header Branding
+    const addHeader = (doc) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(16);
+      doc.setTextColor(33, 33, 33);
+      doc.text("Dr. Mahalingam College of Engineering and Technology", 105, 12, { align: 'center' });
+      
+      doc.setFontSize(12);
+      doc.setTextColor(63, 81, 181);
+      doc.text("ECE - Department Association", 105, 18, { align: 'center' });
+
+      doc.setDrawColor(200);
+      doc.line(20, 22, 190, 22);
+
+      doc.setFontSize(20);
+      doc.setTextColor(40, 44, 52);
+      doc.text(`OD LIST`, 105, 32, { align: 'center' });
+
+      doc.setFontSize(13);
+      doc.setTextColor(63, 81, 181);
+      doc.text(`${event?.title}`, 105, 39, { align: 'center' });
+
+      doc.setFontSize(9);
+      doc.setTextColor(100);
+      doc.setFont('helvetica', 'normal');
+      const tabText = activeTab !== 'all' ? ` - ${activeTab.toUpperCase()}` : '';
+      doc.text(`Generated: ${new Date().toLocaleDateString()} ${tabText} | Timing: ${selectedSession}`, 105, 45, { align: 'center' });
+    };
+
+    addHeader(doc);
+    let currentY = 55;
+
+    years.forEach((year) => {
+      const depts = Object.keys(groupedData[year]).sort();
+      
+      depts.forEach((dept, dIdx) => {
+        // Add new page for every department except the very first one
+        if (!(year === years[0] && dIdx === 0)) {
+          doc.addPage();
+        }
+        
+        addHeader(doc);
+        currentY = 55;
+
+        // Show Year Heading only on the first department of that year? 
+        // Or on every page of that year's departments?
+        // Let's show it on every page for clarity since each dept is on its own page.
+        doc.setFontSize(16);
+        doc.setTextColor(33, 33, 33);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${year.toUpperCase()} YEAR`, 105, currentY, { align: 'center' });
+        currentY += 10;
+
+        const teams = groupedData[year][dept];
+        const tableRows = [];
+        const rowSpans = [];
+        let sNo = 1;
+        let rowIndex = 0;
+
+        teams.forEach(reg => {
+          const mCount = reg.members.length;
+          if (mCount > 0) {
+            rowSpans.push({ index: rowIndex, span: mCount });
+            rowIndex += mCount;
+          }
+          reg.members.forEach(m => {
+            tableRows.push([
+              sNo++,
+              reg.teamName || 'Unnamed',
+              m.user?.name || 'N/A',
+              m.user?.registerNumber || 'N/A',
+              m.user?.section || '—',
+              selectedSession,
+              new Date(reg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            ]);
+          });
+        });
+
+        doc.setFontSize(12);
+        doc.setTextColor(99, 102, 241);
+        doc.text(`DEPARTMENT: ${dept}`, 14, currentY);
+        currentY += 4;
+
+        autoTable(doc, {
+          head: [tableColumn],
+          body: tableRows,
+          startY: currentY,
+          theme: 'grid',
+          styles: { 
+            font: 'helvetica',
+            fontSize: 9, 
+            halign: 'center', 
+            valign: 'middle', 
+            cellPadding: 2.5 
+          },
+          headStyles: { fillColor: [63, 81, 181], textColor: 255, fontStyle: 'bold' },
+          columnStyles: {
+            0: { cellWidth: 12 }, // S.No
+            1: { cellWidth: 35, fontStyle: 'bold' }, // Team Name
+            2: { cellWidth: 50, halign: 'left' },   // Full Name
+            4: { cellWidth: 15 }, // Sec
+            5: { cellWidth: 28 }, // Session
+            6: { cellWidth: 22 }  // Reg Time
+          },
+          didParseCell: function (data) {
+            if (data.section === 'body' && data.column.index === 1) {
+              const spanInfo = rowSpans.find(s => s.index === data.row.index);
+              if (spanInfo) data.cell.rowSpan = spanInfo.span;
+            }
+          }
+        });
+      });
+    });
+
+    const pageCount = doc.internal.getNumberOfPages();
+    for(let i = 1; i <= pageCount; i++) {
+        doc.setPage(i);
+        doc.setFontSize(8);
+        doc.setTextColor(150);
+        doc.text(`Page ${i} of ${pageCount} | Helix-26 Spectrum Management`, 105, 288, { align: 'center' });
+    }
+
+    doc.save(`${event?.title}_Full_OD_List.pdf`);
+  };
 
   const handleEndAttendance = async () => {
     try {
@@ -302,9 +474,28 @@ const AdminParticipantManagement = () => {
           )}
 
           <div className="ae-search-box">
-            <input type="text" placeholder="Search team or leader…" value={search} onChange={e => setSearch(e.target.value)} className="form-input" />
+            <select 
+              value={selectedDept} 
+              onChange={e => setSelectedDept(e.target.value)}
+              className="form-input"
+              style={{ width: 'auto' }}
+            >
+              {departments.map(dept => (
+                <option key={dept} value={dept}>
+                  {dept === 'all' ? 'All Departments' : dept}
+                </option>
+              ))}
+            </select>
+            <input 
+              type="text" 
+              placeholder="Search team or leader…" 
+              value={search} 
+              onChange={e => setSearch(e.target.value)} 
+              className="form-input" 
+              style={{ flex: 1 }}
+            />
           </div>
-          <button className="btn btn-outline btn-sm" onClick={() => window.print()}>🖨️ PDF</button>
+          <button className="btn btn-outline btn-sm" onClick={generateODList}>📄 Export OD List (PDF)</button>
         </div>
       </header>
 
@@ -368,7 +559,7 @@ const AdminParticipantManagement = () => {
             { key: 'all', label: 'Registered Participants' },
             { key: 'shortlisted', label: 'Shortlisted' },
             ...[...Array(event?.rounds || 0)].map((_, i) => ({ key: `round-${i+1}`, label: `Round ${i+1}` })),
-            { key: 'disqualified', label: '🚫 DQ', danger: true }
+            { key: 'disqualified', label: 'Disqualified', danger: true }
           ].map(tab => {
             const currentCount = counts[tab.key] !== undefined ? counts[tab.key] : counts.dq;
             let limit = null;
@@ -410,6 +601,7 @@ const AdminParticipantManagement = () => {
                   <th className="ae-th-num">#</th>
                   <th className="ae-th-team">Team & Members</th>
                   <th className="hide-mobile ae-th-leader">Leader</th>
+                  <th className="hide-mobile ae-th-time">Reg. Time</th>
                   {isJuryRound && <th className="ae-th-score">Jury Score</th>}
                   {activeTab !== 'attendance' && <th className="ae-th-status">Status</th>}
                   {activeTab.startsWith('round-') && <th className="ae-th-at">At.</th>}
@@ -461,6 +653,9 @@ const AdminParticipantManagement = () => {
                         <code>{reg.teamLeader?.registerNumber || 'N/A'}</code>
                         <small>{reg.teamLeader?.department || '—'}</small>
                       </div>
+                    </td>
+                    <td className="hide-mobile" data-label="Reg Time" style={{ fontSize: '0.85rem', color: 'var(--clr-text-muted)' }}>
+                      {new Date(reg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </td>
                     {isJuryRound && (
                       <td data-label="Score">

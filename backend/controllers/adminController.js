@@ -88,7 +88,7 @@ export const getEventRegistrations = async (req, res) => {
     const registrations = await Registration.find({ event: req.params.id })
       .populate('teamLeader', 'name email registerNumber department year section mobile')
       .populate('members.user', 'name email registerNumber department year section mobile')
-      .sort('-createdAt');
+      .sort('createdAt');
     
     // Also fetch scores for this event to allow admin review
     const scores = await Score.find({ event: req.params.id })
