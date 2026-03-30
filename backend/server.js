@@ -85,6 +85,23 @@ app.get('/api/dashboard', protect, (req, res) => {
   });
 });
 
+app.get('/', (req, res) => {
+  res.send(`Spectrum Backend is Live! (Environment: ${process.env.NODE_ENV || 'development'})`);
+});
+
+app.get('/api/config-check', (req, res) => {
+  res.json({
+    frontend: process.env.FRONTEND_URL,
+    backend: process.env.BACKEND_URL,
+    trustProxy: app.get('trust proxy'),
+    headers: {
+      host: req.headers.host,
+      forwardedHost: req.headers['x-forwarded-host'],
+      forwardedProto: req.headers['x-forwarded-proto']
+    }
+  });
+});
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {

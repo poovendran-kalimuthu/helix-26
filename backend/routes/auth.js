@@ -37,19 +37,4 @@ router.get('/logout', logout);
 // @route   PUT /api/auth/profile
 router.put('/profile', protect, updateProfile);
 
-// @desc    Debug OAuth Configuration
-// @route   GET /api/auth/debug
-router.get('/debug', (req, res) => {
-  res.json({
-    frontendUrl: process.env.FRONTEND_URL,
-    backendUrl: process.env.BACKEND_URL,
-    headers: {
-      host: req.headers.host,
-      forwardedHost: req.headers['x-forwarded-host'],
-      forwardedProto: req.headers['x-forwarded-proto']
-    },
-    suggestedRedirect: `${(process.env.FRONTEND_URL || '').replace(/\/$/, '')}/api/auth/google/callback`
-  });
-});
-
 export default router;
