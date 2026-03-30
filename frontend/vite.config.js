@@ -6,10 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     host: true,
-    allowedHosts: ['nontenable-unseductively-hildred.ngrok-free.dev'],
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://helix-26.onrender.com',
         changeOrigin: true,
         secure: false,
       }
