@@ -5,12 +5,12 @@ import Loader from './Loader';
 import { API_URL } from '../config';
 import './CompleteProfile.css';
 
-const DEPARTMENTS = ['CSE','AIDS','AIML', 'CYS' ,'ECE', 'ACT','MECH', 'CIVIL', 'EEE','VLSI', 'IT'];
-const YEARS = ['Second', 'Third', ];
+const DEPARTMENTS = ['ACT', 'VLSI', 'AIML', 'AIDS', 'CYBER', 'AUTO'];
+const YEARS = ['Second', 'Third'];
 
 const CompleteProfile = () => {
   const [formData, setFormData] = useState({
-    name: '', registerNumber: '', department: 'CSE', year: '1st', section: '', mobile: '', alternateEmail: ''
+    name: '', registerNumber: '', department: 'ACT', year: 'Second', section: '', mobile: '', alternateEmail: ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
