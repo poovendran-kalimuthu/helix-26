@@ -94,7 +94,6 @@
 .ln-feature:hover { border-color: rgba(99,102,241,0.3); }
 
 .ln-feature-icon {
-  font-size: 1.4rem;
   width: 42px; height: 42px;
   display: flex;
   align-items: center;
@@ -102,6 +101,7 @@
   background: rgba(99,102,241,0.1);
   border-radius: var(--radius-sm);
   flex-shrink: 0;
+  color: var(--clr-accent-2);
 }
 
 .ln-feature strong {
@@ -223,9 +223,15 @@
 .ln-security-item {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 0.8rem;
   color: var(--clr-text-muted);
+  padding: 4px 0;
+}
+
+.ln-security-item svg {
+  color: var(--clr-accent-2);
+  opacity: 0.8;
 }
 
 /* Legal */
