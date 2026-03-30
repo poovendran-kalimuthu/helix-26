@@ -25,8 +25,8 @@ import { protect } from './middleware/authMiddleware.js';
 
 const app = express();
  
-// Essential for ngrok/proxy to work with OAuth and session cookies
-app.set('trust proxy', 1);
+// Essential for Vercel/Render proxy to work correctly
+app.set('trust proxy', true); // Trust all upstream proxies (Vercel + Render)
 
 // Enable CORS
 const allowedOrigins = [
