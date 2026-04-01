@@ -29,6 +29,7 @@ function App() {
         <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
         <Route path="/events" element={<ProtectedRoute><EventsList /></ProtectedRoute>} />
         <Route path="/events/:id" element={<ProtectedRoute><EventDetails /></ProtectedRoute>} />
+        <Route path="/events/:id/project-submission" element={<ProtectedRoute><ProjectSubmission /></ProtectedRoute>} />
         
         {/* Admin Routes */}
         <Route path="/admin/events" element={<ProtectedRoute><AdminEvents /></ProtectedRoute>} />
@@ -36,6 +37,7 @@ function App() {
         <Route path="/admin/events/:id/participants" element={<ProtectedRoute><AdminParticipantManagement /></ProtectedRoute>} />
         <Route path="/admin/events/:id/evaluators" element={<ProtectedRoute><AdminEvaluators /></ProtectedRoute>} />
         <Route path="/admin/events/:id/attendance" element={<ProtectedRoute><AdminAttendance /></ProtectedRoute>} />
+        <Route path="/admin/events/:id/project-review" element={<ProtectedRoute><AdminProjectReview /></ProtectedRoute>} />
         
         {/* Public/Other Routes */}
         <Route path="/profile/:id" element={<PublicProfile />} />

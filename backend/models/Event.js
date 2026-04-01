@@ -26,6 +26,7 @@ const eventSchema = new mongoose.Schema({
   imageUrl: { type: String },
   isPublished: { type: Boolean, default: false },
   isRegistrationOpen: { type: Boolean, default: true },
+  isSubmissionOpen: { type: Boolean, default: false },
   isTeamChangeAllowed: { type: Boolean, default: true },
   activeAttendance: {
     round: { type: Number, default: 0 },

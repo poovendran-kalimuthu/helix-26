@@ -1,0 +1,144 @@
+.ps-wrapper {
+  padding: 2rem 1.5rem;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.ps-card {
+  padding: 2.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(20, 22, 40, 0.95) 0%, rgba(13, 15, 26, 0.98) 100%);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px);
+}
+
+.ps-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.ps-header h2 {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+
+.ps-header p {
+  color: #818cf8;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.ps-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.ps-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  position: relative;
+}
+
+.ps-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ps-label small {
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+}
+
+.ps-input, .ps-textarea {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  width: 100%;
+}
+
+.ps-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.ps-input:focus, .ps-textarea:focus {
+  outline: none;
+  border-color: #6366f1;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+}
+
+.ps-input:disabled, .ps-textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.ps-char-count {
+  position: absolute;
+  bottom: -20px;
+  right: 0;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.ps-char-count.warning { color: #f59e0b; }
+.ps-char-count.error { color: #ef4444; }
+
+.ps-locked-banner {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #f87171;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.ps-actions {
+  margin-top: 1rem;
+}
+
+.ps-submit-btn {
+  width: 100%;
+  padding: 1.25rem;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.4);
+}
+
+@media (max-width: 640px) {
+  .ps-card {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
+  .ps-header h2 { font-size: 1.7rem; }
+  .ps-form { gap: 1.5rem; }
+}

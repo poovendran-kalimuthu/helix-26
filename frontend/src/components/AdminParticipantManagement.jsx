@@ -467,6 +467,11 @@ const AdminParticipantManagement = () => {
           <button className="btn btn-outline btn-sm" onClick={() => navigate(`/admin/events/${id}/evaluators`)}>
             🧑‍⚖️ Manage Evaluators
           </button>
+          {(event?.title?.toLowerCase()?.includes('innovator') || event?.roundConfig?.some(r => r.evaluationType === 'jury')) && (
+            <button className="btn btn-accent btn-sm" onClick={() => navigate(`/admin/events/${id}/project-review`)}>
+              📁 Review Project Details
+            </button>
+          )}
           
           {/* Admin Scanner Trigger */}
           {(event?.attendanceMode === 'admin_scan' || event?.attendanceMode === 'both') && (

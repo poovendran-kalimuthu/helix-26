@@ -383,6 +383,17 @@ const EventDetails = () => {
 
           <div className="event-registration-right">
             <div className="registration-card glass-panel">
+              {isLeader && registration && (eventData?.title?.toLowerCase()?.includes('innovator') || eventData?.roundConfig?.some(r => r.evaluationType === 'jury')) && (
+                <div className="project-submission-prompt glass-strong" style={{ padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(99, 102, 241, 0.3)', marginBottom: '1.5rem', background: 'rgba(99, 102, 241, 0.05)' }}>
+                  <h4 style={{ color: '#fff', marginBottom: '0.5rem', fontSize: '1.1rem' }}>🚀 Project Submission</h4>
+                  <p style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', marginBottom: '1rem', lineHeight: '1.4' }}>
+                    Team Leader: Please provide your project's problem statement, solution, and impact details for the jury.
+                  </p>
+                  <button type="button" className="btn btn-accent btn-block btn-sm" onClick={() => navigate(`/events/${id}/project-submission`)}>
+                    Manage Project Details
+                  </button>
+                </div>
+              )}
               <h2>Registration Form</h2>
 
               {statusMessage.text && statusMessage.type && (

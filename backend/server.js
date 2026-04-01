@@ -21,6 +21,7 @@ import adminRoutes from './routes/admin.js';
 import userRoutes from './routes/users.js';
 import evaluatorRoutes from './routes/evaluator.js';
 import attendanceRoutes from './routes/attendance.js';
+import projectRoutes from './routes/projects.js';
 import { protect } from './middleware/authMiddleware.js';
 
 const app = express();
