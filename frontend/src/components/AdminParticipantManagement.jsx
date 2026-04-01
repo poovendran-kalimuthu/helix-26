@@ -27,6 +27,7 @@ const AdminParticipantManagement = () => {
   const [showAdminScanner, setShowAdminScanner] = useState(false);
   const [selectedDept, setSelectedDept] = useState('all');
   const [selectedSession, setSelectedSession] = useState('');
+  const [selectedRound, setSelectedRound] = useState(1);
 
   const sessionMap = {
     'none': '9:00 AM - 4:00 PM',
@@ -69,6 +70,7 @@ const AdminParticipantManagement = () => {
         if (ev?.activeAttendance?.sessionToken) {
           setQrActive(true);
           setQrSession(ev.activeAttendance);
+          setSelectedRound(ev.activeAttendance.round);
         }
       }
     } catch { showToast('Failed to load data.', 'error'); }
@@ -237,7 +239,7 @@ const AdminParticipantManagement = () => {
 
   const generateODList = () => {
     const doc = new jsPDF();
-    const tableColumn = ["S.No", "Team Name", "Full Name", "Register No", "Class (Sec)", "Event Session", "Reg Time"];
+    const tableColumn = ["S.No", "Team Name", "Full Name", "Register No", "Phone Number", "Class (Sec)", "Event Session"];
     
     // Grouping Logic
     // We'll use the 'registrations' for 'Entire list' but filtered by 'activeTab' 
@@ -331,9 +333,9 @@ const AdminParticipantManagement = () => {
               reg.teamName || 'Unnamed',
               m.user?.name || 'N/A',
               m.user?.registerNumber || 'N/A',
+              m.user?.mobile || '—',
               m.user?.section || '—',
-              selectedSession,
-              new Date(reg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+              selectedSession
             ]);
           });
         });
@@ -357,12 +359,13 @@ const AdminParticipantManagement = () => {
           },
           headStyles: { fillColor: [63, 81, 181], textColor: 255, fontStyle: 'bold' },
           columnStyles: {
-            0: { cellWidth: 12 }, // S.No
-            1: { cellWidth: 35, fontStyle: 'bold' }, // Team Name
-            2: { cellWidth: 50, halign: 'left' },   // Full Name
-            4: { cellWidth: 15 }, // Sec
-            5: { cellWidth: 28 }, // Session
-            6: { cellWidth: 22 }  // Reg Time
+            0: { cellWidth: 10 }, // S.No
+            1: { cellWidth: 32, fontStyle: 'bold' }, // Team Name
+            2: { cellWidth: 45, halign: 'left' },   // Full Name
+            3: { cellWidth: 25 }, // Reg No
+            4: { cellWidth: 28 }, // Phone
+            5: { cellWidth: 15 }, // Sec
+            6: { cellWidth: 30 }  // Session
           },
           didParseCell: function (data) {
             if (data.section === 'body' && data.column.index === 1) {
@@ -750,18 +753,34 @@ const AdminParticipantManagement = () => {
       {/* Admin QR Scanner Modal */}
       {showAdminScanner && (
         <div className="ae-modal-overlay" onClick={() => setShowAdminScanner(false)}>
-           <div className="ae-modal glass-strong animate-pop-in" onClick={e => e.stopPropagation()} style={{ width: '100dvw', height: '100dvh', margin: 0, borderRadius: 0, padding: 0 }}>
-              <AttendanceScanner 
-                eventId={id} 
-                isAdminScanner={true}
-                round={activeRoundNum || 1}
-                onComplete={(msg) => {
-                  showToast(msg || `Participant checked in for Round ${activeRoundNum || 1}!`);
-                  setShowAdminScanner(false);
-                  fetchData();
-                }}
-                onCancel={() => setShowAdminScanner(false)}
-              />
+          <div className="ae-modal glass-strong animate-pop-in" onClick={e => e.stopPropagation()} style={{ width: '100dvw', height: '100dvh', margin: 0, borderRadius: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
+              <div className="ae-scanner-round-selector glass" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <span style={{ fontWeight: '600' }}>Select Round for Attendance:</span>
+                <div className="btn-group" style={{ display: 'flex', gap: '5px' }}>
+                  {[...Array(event?.rounds || 1)].map((_, i) => (
+                    <button 
+                      key={i} 
+                      className={`btn btn-sm ${selectedRound === i + 1 ? 'btn-primary' : 'btn-ghost'}`}
+                      onClick={() => setSelectedRound(i + 1)}
+                    >
+                      Round {i + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <AttendanceScanner 
+                  eventId={id} 
+                  isAdminScanner={true}
+                  round={selectedRound}
+                  onComplete={(msg) => {
+                    showToast(msg || `Participant checked in for Round ${selectedRound}!`);
+                    setShowAdminScanner(false);
+                    fetchData();
+                  }}
+                  onCancel={() => setShowAdminScanner(false)}
+                />
+              </div>
            </div>
         </div>
       )}

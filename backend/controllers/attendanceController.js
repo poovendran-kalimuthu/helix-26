@@ -68,6 +68,21 @@ export const checkIn = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Registration not found for this user' });
     }
 
+    // --- QUALIFICATION CHECK ---
+    if (roundNumber === 1) {
+      if (!registration.isShortlisted && registration.currentRound < 1) {
+        return res.status(403).json({ success: false, message: 'You are not shortlisted for Round 1' });
+      }
+    } else if (roundNumber > 1) {
+      if (registration.currentRound < roundNumber) {
+        return res.status(403).json({ success: false, message: `You are not qualified for Round ${roundNumber}.` });
+      }
+    }
+
+    if (registration.isDisqualified) {
+      return res.status(403).json({ success: false, message: 'Your team is disqualified' });
+    }
+
     // Check if THIS SPECIFIC USER is already marked for this round
     const alreadyMarked = registration.attendance.some(a => a.round === roundNumber && a.user.toString() === userId.toString());
     if (alreadyMarked) {
@@ -136,10 +151,28 @@ export const markByAdminScan = async (req, res) => {
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
 
     // Use provided round or active attendance round
-    const roundNum = req.body.round || event.activeAttendance?.round;
+    const roundNum = parseInt(req.body.round) || event.activeAttendance?.round;
     
     if (!roundNum) {
       return res.status(400).json({ success: false, message: 'No active attendance round. Please start a session or specify a round.' });
+    }
+
+    // --- QUALIFICATION CHECK ---
+    // Round 1: Must be shortlisted OR already in Round 1
+    if (roundNum === 1) {
+      if (!registration.isShortlisted && registration.currentRound < 1) {
+        return res.status(403).json({ success: false, message: 'Participant not shortlisted for Round 1' });
+      }
+    } 
+    // Round N (>1): Must be advanced to at least that round
+    else if (roundNum > 1) {
+      if (registration.currentRound < roundNum) {
+        return res.status(403).json({ success: false, message: `Participant not qualified For Round ${roundNum}. They are currently in Round ${registration.currentRound}.` });
+      }
+    }
+
+    if (registration.isDisqualified) {
+      return res.status(403).json({ success: false, message: 'Participant is disqualified' });
     }
 
     const userId = registration.teamLeader; // Mark leader as present for the team
@@ -147,7 +180,7 @@ export const markByAdminScan = async (req, res) => {
     // Check if already marked
     const isPresent = registration.attendance.some(a => a.round === roundNum && a.user.toString() === userId.toString());
     if (isPresent) {
-      return res.status(200).json({ success: true, message: 'Already marked as present' });
+      return res.status(200).json({ success: true, message: `Already marked as present for Round ${roundNum}` });
     }
 
     registration.attendance.push({
