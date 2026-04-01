@@ -14,6 +14,8 @@ import AdminAttendance from './components/AdminAttendance';
 import EvaluatorLogin from './components/EvaluatorLogin';
 import EvaluatorPortal from './components/EvaluatorPortal';
 import PublicProfile from './components/PublicProfile';
+import ProjectSubmission from './components/ProjectSubmission';
+import AdminProjectReview from './components/AdminProjectReview';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
