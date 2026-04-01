@@ -5,6 +5,7 @@ import { API_URL } from '../config';
 import Loader from './Loader';
 import { QRCodeCanvas } from 'qrcode.react';
 import './AdminEvents.css';
+import AttendanceScanner from './AttendanceScanner';
 
 const AdminAttendance = () => {
   const { id } = useParams();
@@ -15,6 +16,8 @@ const AdminAttendance = () => {
   const [qrActive, setQrActive] = useState(false);
   const [qrSession, setQrSession] = useState(null);
   const [toast, setToast] = useState({ text: '', type: '' });
+  const [showAdminScanner, setShowAdminScanner] = useState(false);
+  const [selectedRound, setSelectedRound] = useState(1);
 
   useEffect(() => {
     fetchData();
@@ -109,6 +112,9 @@ const AdminAttendance = () => {
           </div>
         </div>
         <div className="ae-header-right no-print">
+            <button className="btn btn-primary btn-sm" onClick={() => setShowAdminScanner(true)}>
+              📷 Scan Participant
+            </button>
             <button className="btn btn-outline btn-sm" onClick={() => window.print()}>🖨️ Print Report</button>
         </div>
       </header>
@@ -247,6 +253,41 @@ const AdminAttendance = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Admin QR Scanner Modal */}
+      {showAdminScanner && (
+        <div className="ae-modal-overlay" onClick={() => setShowAdminScanner(false)}>
+          <div className="ae-modal glass-strong animate-pop-in" onClick={e => e.stopPropagation()} style={{ width: '100dvw', height: '100dvh', margin: 0, borderRadius: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
+              <div className="ae-scanner-round-selector glass" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <span style={{ fontWeight: '600' }}>Select Round for Attendance:</span>
+                <div className="btn-group" style={{ display: 'flex', gap: '5px' }}>
+                  {[...Array(event?.rounds || 1)].map((_, i) => (
+                    <button 
+                      key={i} 
+                      className={`btn btn-sm ${selectedRound === i + 1 ? 'btn-primary' : 'btn-ghost'}`}
+                      onClick={() => setSelectedRound(i + 1)}
+                    >
+                      Round {i + 1}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div style={{ flex: 1, position: 'relative' }}>
+                <AttendanceScanner 
+                  eventId={id} 
+                  isAdminScanner={true}
+                  round={selectedRound}
+                  onComplete={(msg) => {
+                    showToast(msg || `Participant checked in for Round ${selectedRound}!`);
+                    setShowAdminScanner(false);
+                    fetchData();
+                  }}
+                  onCancel={() => setShowAdminScanner(false)}
+                />
+              </div>
+           </div>
         </div>
       )}
     </div>

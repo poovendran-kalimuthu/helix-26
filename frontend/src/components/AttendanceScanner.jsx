@@ -10,6 +10,12 @@ const AttendanceScanner = ({ eventId, onComplete, onCancel, isAdminScanner = fal
   const [isStarted, setIsStarted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const scannerRef = useRef(null);
+  const roundRef = useRef(round);
+
+  // Keep ref in sync with latest prop
+  useEffect(() => {
+    roundRef.current = round;
+  }, [round]);
 
   useEffect(() => {
     const html5QrCode = new Html5Qrcode("reader");
@@ -50,7 +56,7 @@ const AttendanceScanner = ({ eventId, onComplete, onCancel, isAdminScanner = fal
                 res = await axios.post(`${API_URL}/api/attendance/admin-scan`, {
                   registrationId: data.registrationId,
                   eventId: eventId,
-                  round: round // Pass explicit round if available
+                  round: roundRef.current // Use current ref value
                 }, { withCredentials: true });
               } else {
                 // Student mode: scanning session QR
@@ -155,7 +161,7 @@ const AttendanceScanner = ({ eventId, onComplete, onCancel, isAdminScanner = fal
                       res = await axios.post(`${API_URL}/api/attendance/admin-scan`, {
                         registrationId: data.registrationId,
                         eventId: eventId,
-                        round: round // Pass explicit round if available
+                        round: roundRef.current // Use current ref value
                       }, { withCredentials: true });
                     } else {
                       // Student mode: scanning session QR
