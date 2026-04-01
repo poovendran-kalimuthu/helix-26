@@ -27,7 +27,6 @@ const AdminParticipantManagement = () => {
   const [showAdminScanner, setShowAdminScanner] = useState(false);
   const [selectedDept, setSelectedDept] = useState('all');
   const [selectedSession, setSelectedSession] = useState('');
-  const [selectedRound, setSelectedRound] = useState(1);
 
   const sessionMap = {
     'none': '9:00 AM - 4:00 PM',
@@ -594,7 +593,7 @@ const AdminParticipantManagement = () => {
         {filteredRegistrations.length === 0 ? (
           <div className="ae-empty"><span>📭</span><p>No teams in this category.</p></div>
         ) : (
-          <div className="ae-table-wrapper card glass">
+          <div className="ae-table-wrapper card glass hide-on-mobile">
             <table className="ae-table printable">
               <thead>
                 <tr>
@@ -752,37 +751,18 @@ const AdminParticipantManagement = () => {
 
       {/* Admin QR Scanner Modal */}
       {showAdminScanner && (
-        <div className="ae-modal-overlay" onClick={() => setShowAdminScanner(false)}>
-          <div className="ae-modal glass-strong animate-pop-in" onClick={e => e.stopPropagation()} style={{ width: '100dvw', height: '100dvh', margin: 0, borderRadius: 0, padding: 0, display: 'flex', flexDirection: 'column' }}>
-              <div className="ae-scanner-round-selector glass" style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '1rem', justifyContent: 'center', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-                <span style={{ fontWeight: '600' }}>Select Round for Attendance:</span>
-                <div className="btn-group" style={{ display: 'flex', gap: '5px' }}>
-                  {[...Array(event?.rounds || 1)].map((_, i) => (
-                    <button 
-                      key={i} 
-                      className={`btn btn-sm ${selectedRound === i + 1 ? 'btn-primary' : 'btn-ghost'}`}
-                      onClick={() => setSelectedRound(i + 1)}
-                    >
-                      Round {i + 1}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div style={{ flex: 1, position: 'relative' }}>
-                <AttendanceScanner 
-                  eventId={id} 
-                  isAdminScanner={true}
-                  round={selectedRound}
-                  onComplete={(msg) => {
-                    showToast(msg || `Participant checked in for Round ${selectedRound}!`);
-                    setShowAdminScanner(false);
-                    fetchData();
-                  }}
-                  onCancel={() => setShowAdminScanner(false)}
-                />
-              </div>
-           </div>
-        </div>
+        <AttendanceScanner 
+          eventId={id} 
+          isAdminScanner={true}
+          initialRound={event?.activeAttendance?.round || 1}
+          eventRounds={event?.rounds || 1}
+          onComplete={(msg) => {
+            showToast(msg || `Participant checked in!`);
+            setShowAdminScanner(false);
+            fetchData();
+          }}
+          onCancel={() => setShowAdminScanner(false)}
+        />
       )}
     </div>
   );

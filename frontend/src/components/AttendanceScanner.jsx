@@ -3,19 +3,14 @@ import { Html5Qrcode } from 'html5-qrcode';
 import axios from 'axios';
 import { API_URL } from '../config';
 
-const AttendanceScanner = ({ eventId, onComplete, onCancel, isAdminScanner = false, round = null }) => {
+const AttendanceScanner = ({ eventId, onComplete, onCancel, isAdminScanner = false, initialRound = 1, eventRounds = 1 }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isStarted, setIsStarted] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedRound, setSelectedRound] = useState(initialRound);
   const scannerRef = useRef(null);
-  const roundRef = useRef(round);
-
-  // Keep ref in sync with latest prop
-  useEffect(() => {
-    roundRef.current = round;
-  }, [round]);
 
   useEffect(() => {
     const html5QrCode = new Html5Qrcode("reader");
@@ -56,7 +51,7 @@ const AttendanceScanner = ({ eventId, onComplete, onCancel, isAdminScanner = fal
                 res = await axios.post(`${API_URL}/api/attendance/admin-scan`, {
                   registrationId: data.registrationId,
                   eventId: eventId,
-                  round: roundRef.current // Use current ref value
+                  round: selectedRound // Using internal state
                 }, { withCredentials: true });
               } else {
                 // Student mode: scanning session QR
@@ -161,7 +156,7 @@ const AttendanceScanner = ({ eventId, onComplete, onCancel, isAdminScanner = fal
                       res = await axios.post(`${API_URL}/api/attendance/admin-scan`, {
                         registrationId: data.registrationId,
                         eventId: eventId,
-                        round: roundRef.current // Use current ref value
+                        round: selectedRound // Using internal state
                       }, { withCredentials: true });
                     } else {
                       // Student mode: scanning session QR
@@ -212,6 +207,23 @@ const AttendanceScanner = ({ eventId, onComplete, onCancel, isAdminScanner = fal
       </div>
       
       <div className="scanner-body">
+        {isAdminScanner && (
+          <div className="ae-scanner-round-selector-inner">
+            <span className="selector-label">Target Round:</span>
+            <div className="selector-btns">
+              {[...Array(eventRounds)].map((_, i) => (
+                <button 
+                  key={i} 
+                  className={`selector-btn ${selectedRound === i + 1 ? 'active' : ''}`}
+                  onClick={() => setSelectedRound(i + 1)}
+                >
+                  R{i + 1}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {success ? (
           <div className="scanner-success">
             <span className="success-icon">✅</span>
@@ -394,6 +406,36 @@ const AttendanceScanner = ({ eventId, onComplete, onCancel, isAdminScanner = fal
         }
         .success-icon { font-size: 4.5rem; display: block; margin-bottom: 1.5rem; }
         .success-text { color: #10b981; font-weight: 800; font-size: 1.4rem; }
+        
+        .ae-scanner-round-selector-inner {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 15px;
+          background: rgba(255,255,255,0.05);
+          border-radius: 12px;
+          margin-bottom: 15px;
+          border: 1px solid rgba(255,255,255,0.08);
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+        .selector-label { font-size: 0.8rem; font-weight: 700; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+        .selector-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+        .selector-btn {
+          background: rgba(255,255,255,0.1);
+          color: #fff;
+          border: none;
+          padding: 6px 14px;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        .selector-btn.active {
+          background: #6366f1;
+          box-shadow: 0 0 15px rgba(99,102,241,0.4);
+        }
         
         @keyframes popIn {
           0% { transform: scale(0.5); opacity: 0; }
