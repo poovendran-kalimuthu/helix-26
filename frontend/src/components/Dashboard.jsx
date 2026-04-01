@@ -35,6 +35,15 @@ const Dashboard = () => {
       const res = await axios.get(`${API_URL}/api/auth/login/success`);
       if (res.data.success) {
         const u = res.data.user;
+        
+        // Handle post-login redirect
+        const redirectUrl = sessionStorage.getItem('authRedirectUrl');
+        if (redirectUrl) {
+          sessionStorage.removeItem('authRedirectUrl');
+          navigate(redirectUrl);
+          return;
+        }
+
         if (!u.isProfileComplete) { navigate('/complete-profile'); return; }
         setUser(u);
         fetchEvents();

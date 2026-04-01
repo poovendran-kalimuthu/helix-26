@@ -14,26 +14,34 @@ import AdminAttendance from './components/AdminAttendance';
 import EvaluatorLogin from './components/EvaluatorLogin';
 import EvaluatorPortal from './components/EvaluatorPortal';
 import PublicProfile from './components/PublicProfile';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/login" element={<Login />} />
+        
+        {/* Protected Routes */}
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/dashboard.html" element={<Navigate to="/dashboard" replace />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/complete-profile" element={<CompleteProfile />} />
-        <Route path="/edit-profile" element={<EditProfile />} />
-        <Route path="/events" element={<EventsList />} />
-        <Route path="/events/:id" element={<EventDetails />} />
+        <Route path="/complete-profile" element={<ProtectedRoute><CompleteProfile /></ProtectedRoute>} />
+        <Route path="/edit-profile" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="/events" element={<ProtectedRoute><EventsList /></ProtectedRoute>} />
+        <Route path="/events/:id" element={<ProtectedRoute><EventDetails /></ProtectedRoute>} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/events" element={<ProtectedRoute><AdminEvents /></ProtectedRoute>} />
+        <Route path="/admin/events/:id" element={<ProtectedRoute><AdminEventDetail /></ProtectedRoute>} />
+        <Route path="/admin/events/:id/participants" element={<ProtectedRoute><AdminParticipantManagement /></ProtectedRoute>} />
+        <Route path="/admin/events/:id/evaluators" element={<ProtectedRoute><AdminEvaluators /></ProtectedRoute>} />
+        <Route path="/admin/events/:id/attendance" element={<ProtectedRoute><AdminAttendance /></ProtectedRoute>} />
+        
+        {/* Public/Other Routes */}
         <Route path="/profile/:id" element={<PublicProfile />} />
-        <Route path="/admin/events" element={<AdminEvents />} />
-        <Route path="/admin/events/:id" element={<AdminEventDetail />} />
-        <Route path="/admin/events/:id/participants" element={<AdminParticipantManagement />} />
-        <Route path="/admin/events/:id/evaluators" element={<AdminEvaluators />} />
-        <Route path="/admin/events/:id/attendance" element={<AdminAttendance />} />
         <Route path="/evaluator/login" element={<EvaluatorLogin />} />
         <Route path="/evaluator/portal" element={<EvaluatorPortal />} />
+        
         {/* Redirect root to login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>

@@ -1485,3 +1485,10 @@
   .ae-attendance-grid, .ae-header { display: none !important; }
   .ae-card-separator { font-weight: bold; font-size: 14pt; margin-bottom: 1rem; text-align: center; color: black !important; }
 }
+
+/* ── Mobile Responsive Helpers ── */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
