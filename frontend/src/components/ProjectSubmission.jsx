@@ -10,6 +10,7 @@ const ProjectSubmission = () => {
   const [loading, setLoading] = useState(true);
   const [event, setEvent] = useState(null);
   const [formData, setFormData] = useState({
+    projectTitle: '',
     problemStatement: '',
     targetUsers: '',
     proposedSolution: '',
@@ -122,6 +123,19 @@ const ProjectSubmission = () => {
         )}
 
         <form className="ps-form" onSubmit={handleSubmit}>
+          <div className="ps-field-group">
+            <label className="ps-label">Project Title / Startup Name</label>
+            <input 
+              name="projectTitle"
+              className="ps-input"
+              value={formData.projectTitle}
+              onChange={handleChange}
+              disabled={!event?.isSubmissionOpen}
+              required
+              placeholder="Enter your Project or Team Name"
+            />
+          </div>
+
           <div className="ps-field-group">
             <label className="ps-label">Problem Statement <small>Max 3 lines</small></label>
             <textarea 

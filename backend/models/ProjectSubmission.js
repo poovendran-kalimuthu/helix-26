@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 
 const projectSubmissionSchema = new mongoose.Schema({
-  registration: { type: mongoose.Schema.Types.ObjectId, ref: 'Registration', required: true, unique: true },
+  registration: { type: mongoose.Schema.Types.ObjectId, ref: 'Registration', required: true },
   event: { type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true },
+  projectTitle: { type: String, required: true },
   problemStatement: { type: String, required: true },
   targetUsers: { type: String, required: true },
   proposedSolution: { type: String, required: true },

@@ -77,12 +77,12 @@ const AdminProjectReview = () => {
         {submissions.map(sub => (
           <div key={sub._id} className="apr-tile" onClick={() => setSelectedProject(sub)}>
             <div className="apr-tile-header">
-              <div className="apr-tile-team">{sub.registration?.teamName}</div>
+              <div className="apr-tile-team">{sub.projectTitle || sub.registration?.teamName}</div>
               <div className="badge badge-accent">R{sub.registration?.currentRound}</div>
             </div>
             
             <div className="apr-tile-meta">
-              <div className="apr-tile-leader">By <strong>{sub.registration?.teamLeader?.name}</strong></div>
+              <div className="apr-tile-leader"><strong>{sub.registration?.teamName}</strong> • {sub.registration?.teamLeader?.name}</div>
               <p className="apr-tile-preview">{sub.problemStatement}</p>
             </div>
 
@@ -107,8 +107,8 @@ const AdminProjectReview = () => {
           <div className="apr-modal animate-pop-in" onClick={e => e.stopPropagation()}>
             <div className="apr-modal-header">
               <div className="apr-modal-title">
-                <h3>{selectedProject.registration?.teamName}</h3>
-                <p className="apr-leader">Leader: {selectedProject.registration?.teamLeader?.name} ({selectedProject.registration?.teamLeader?.registerNumber})</p>
+                <h3>{selectedProject.projectTitle || selectedProject.registration?.teamName}</h3>
+                <p className="apr-leader">Team: {selectedProject.registration?.teamName} • Leader: {selectedProject.registration?.teamLeader?.name}</p>
               </div>
               <button className="btn btn-circle btn-ghost" onClick={() => setSelectedProject(null)}>✕</button>
             </div>
