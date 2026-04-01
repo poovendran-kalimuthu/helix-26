@@ -22,7 +22,7 @@ const AdminProjectReview = () => {
         axios.get(`${API_URL}/api/events/${eventId}`, { withCredentials: true }),
         axios.get(`${API_URL}/api/projects/event/${eventId}`, { withCredentials: true })
       ]);
-      setEvent(eventRes.data);
+      setEvent(eventRes.data.event);
       setSubmissions(subRes.data);
       setLoading(false);
     } catch (err) {
@@ -59,7 +59,7 @@ const AdminProjectReview = () => {
         </div>
         
         <div className="apr-toggle-box">
-          <span className="apr-toggle-label">Accepting Submissions:</span>
+          <span className="apr-toggle-label">Participants Editing/Submission:</span>
           <label className="switch">
             <input 
               type="checkbox" 

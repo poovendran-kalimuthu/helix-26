@@ -31,7 +31,7 @@ const ProjectSubmission = () => {
   const fetchData = async () => {
     try {
       const eventRes = await axios.get(`${API_URL}/api/events/${eventId}`, { withCredentials: true });
-      setEvent(eventRes.data);
+      setEvent(eventRes.data.event);
 
       const submissionRes = await axios.get(`${API_URL}/api/projects/my-submission/${eventId}`, { withCredentials: true });
       if (submissionRes.data._id) {
