@@ -77,6 +77,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/evaluator', evaluatorRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/projects', projectRoutes);
 
 // Example protected route
 app.get('/api/dashboard', protect, (req, res) => {
