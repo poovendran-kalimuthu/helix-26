@@ -47,6 +47,15 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
+// Session-Header Injection Middleware (Fix for Brave/Safari cookie blocking)
+app.use((req, res, next) => {
+  const sid = req.headers['x-auth-token'] || req.query.sid;
+  if (sid && (!req.headers.cookie || !req.headers.cookie.includes('connect.sid'))) {
+    req.headers.cookie = `connect.sid=${sid}${req.headers.cookie ? '; ' + req.headers.cookie : ''}`;
+  }
+  next();
+});
+
 // Session Setup - MUST BE BEFORE PASSPORT MIDDLEWARE
 app.use(session({
   secret: process.env.SESSION_SECRET,

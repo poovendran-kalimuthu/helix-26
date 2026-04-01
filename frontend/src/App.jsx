@@ -17,8 +17,30 @@ import PublicProfile from './components/PublicProfile';
 import ProjectSubmission from './components/ProjectSubmission';
 import AdminProjectReview from './components/AdminProjectReview';
 import ProtectedRoute from './components/ProtectedRoute';
+import axios from 'axios';
+
+// Global Axios Interceptor for Session Fallback (Cookie-less Auth Support)
+axios.interceptors.request.use(config => {
+  const token = localStorage.getItem('sid');
+  if (token) {
+    config.headers['x-auth-token'] = token;
+  }
+  return config;
+});
 
 function App() {
+  React.useEffect(() => {
+    // Capture session ID from URL if provided (used by Brave/Safari as fallback)
+    const urlParams = new URLSearchParams(window.location.search);
+    const sid = urlParams.get('sid');
+    if (sid) {
+      localStorage.setItem('sid', sid);
+      // Clean up the URL to remove the sensitive session ID
+      const newUrl = window.location.pathname + window.location.hash;
+      window.history.replaceState({}, document.title, newUrl);
+    }
+  }, []);
+
   return (
     <Router>
       <Routes>
