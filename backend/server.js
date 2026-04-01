@@ -40,8 +40,7 @@ app.use(cors({
   origin: allowedOrigins,
   methods: 'GET,POST,PUT,PATCH,DELETE',
   credentials: true,
-  exposedHeaders: ['set-cookie'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'x-auth-token']
+  exposedHeaders: ['set-cookie']
 }));
 
 // Body parser

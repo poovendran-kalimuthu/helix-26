@@ -19,9 +19,24 @@ import ProjectSubmission from './components/ProjectSubmission';
 import AdminProjectReview from './components/AdminProjectReview';
 import ProtectedRoute from './components/ProtectedRoute';
 
+// Safe LocalStorage Access (Handles cross-domain / Incognito restrictions)
+const getSafeToken = () => {
+  try {
+    return localStorage.getItem('sid');
+  } catch (e) {
+    return null;
+  }
+};
+
+const setSafeToken = (val) => {
+  try {
+    localStorage.setItem('sid', val);
+  } catch (e) {}
+};
+
 // Global Axios Interceptor for Session Fallback (Cookie-less Auth Support)
 axios.interceptors.request.use(config => {
-  const token = localStorage.getItem('sid');
+  const token = getSafeToken();
   if (token) {
     config.headers['x-auth-token'] = token;
   }
@@ -29,14 +44,16 @@ axios.interceptors.request.use(config => {
 });
 
 // Capture session ID from URL synchronously (Crucial for Brave/Safari/iPhone compatibility)
-// This must run before any React component mounts to ensure axios picks it up immediately.
-const urlParams = new URLSearchParams(window.location.search);
-const sid = urlParams.get('sid');
-if (sid) {
-  localStorage.setItem('sid', sid);
-  // Clean up the URL to remove the sensitive session ID
-  const newUrl = window.location.pathname + (window.location.hash || '');
-  window.history.replaceState({}, document.title, newUrl);
+try {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sid = urlParams.get('sid');
+  if (sid) {
+    setSafeToken(sid);
+    const newUrl = window.location.pathname + (window.location.hash || '');
+    window.history.replaceState({}, document.title, newUrl);
+  }
+} catch (e) {
+  console.error("Auth capture error:", e);
 }
 
 function App() {

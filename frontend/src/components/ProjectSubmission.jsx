@@ -96,7 +96,7 @@ const ProjectSubmission = () => {
         ...formData
       }, { withCredentials: true });
       
-      setToast({ show: true, message: 'Project details updated successfully!', type: 'success' });
+      setToast({ show: true, message: 'Idea Submission updated successfully!', type: 'success' });
       setTimeout(() => navigate(`/events/${eventId}`), 2000);
     } catch (err) {
       setToast({ show: true, message: err.response?.data?.message || 'Submission failed.', type: 'danger' });
@@ -112,7 +112,7 @@ const ProjectSubmission = () => {
       <div className="ps-card">
         <div className="ps-header">
           <p>Innovators Battle</p>
-          <h2>Project Details</h2>
+          <h2>Idea Submission</h2>
         </div>
 
         {event && !event.isSubmissionOpen && (
@@ -124,7 +124,7 @@ const ProjectSubmission = () => {
 
         <form className="ps-form" onSubmit={handleSubmit}>
           <div className="ps-field-group">
-            <label className="ps-label">Project Title / Startup Name</label>
+            <label className="ps-label">Idea Title / Startup Name</label>
             <input 
               name="projectTitle"
               className="ps-input"
