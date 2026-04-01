@@ -16,8 +16,14 @@ router.get('/google/callback',
     failureRedirect: '/api/auth/login/failed',
   }),
   (req, res) => {
-    // Successful authentication, redirect to the frontend dashboard.
-    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+    // Explicitly save session before redirecting to prevent race conditions on strict browsers (Safari/iPhone)
+    req.session.save((err) => {
+      if (err) {
+        console.error('Session save error:', err);
+        return res.redirect(`${process.env.FRONTEND_URL}/login?error=session_loss`);
+      }
+      res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+    });
   }
 );
 

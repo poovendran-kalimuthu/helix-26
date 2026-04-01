@@ -31,7 +31,18 @@ const ProjectSubmission = () => {
   const fetchData = async () => {
     try {
       const eventRes = await axios.get(`${API_URL}/api/events/${eventId}`, { withCredentials: true });
-      setEvent(eventRes.data.event);
+      const { event: eventData, isLeader, registration } = eventRes.data;
+
+      // Access Control: Only Team Leaders of Innovators Battle
+      const isInnovatorEvent = eventData.title.toLowerCase().includes('innovator');
+      
+      if (!isLeader || !isInnovatorEvent) {
+        setToast({ show: true, message: 'Access Denied: Only team leaders of Innovators Battle can access this page.', type: 'danger' });
+        setTimeout(() => navigate('/dashboard'), 3000);
+        return;
+      }
+
+      setEvent(eventData);
 
       const submissionRes = await axios.get(`${API_URL}/api/projects/my-submission/${eventId}`, { withCredentials: true });
       if (submissionRes.data._id) {
@@ -85,7 +96,7 @@ const ProjectSubmission = () => {
       }, { withCredentials: true });
       
       setToast({ show: true, message: 'Project details updated successfully!', type: 'success' });
-      setTimeout(() => navigate(`/event/${eventId}`), 2000);
+      setTimeout(() => navigate(`/events/${eventId}`), 2000);
     } catch (err) {
       setToast({ show: true, message: err.response?.data?.message || 'Submission failed.', type: 'danger' });
     } finally {
@@ -119,6 +130,7 @@ const ProjectSubmission = () => {
               value={formData.problemStatement}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="What Problem are you solving?"
             />
           </div>
@@ -131,6 +143,7 @@ const ProjectSubmission = () => {
               value={formData.targetUsers}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="Who are your users?"
             />
           </div>
@@ -143,6 +156,7 @@ const ProjectSubmission = () => {
               value={formData.proposedSolution}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="How does your solution work?"
             />
           </div>
@@ -155,6 +169,7 @@ const ProjectSubmission = () => {
               value={formData.uniqueFactor}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="USP of your project"
             />
           </div>
@@ -167,6 +182,7 @@ const ProjectSubmission = () => {
               value={formData.revenueModel}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="How will you monetize?"
             />
           </div>
@@ -179,6 +195,7 @@ const ProjectSubmission = () => {
               value={formData.problemValidation}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="Proof that this is a real problem"
             />
           </div>
@@ -191,6 +208,7 @@ const ProjectSubmission = () => {
               value={formData.feasibility}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="Is it practically possible to build?"
             />
           </div>
@@ -203,6 +221,7 @@ const ProjectSubmission = () => {
               value={formData.workflow}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="1. Step one\n2. Step two\n3. Step three"
             />
           </div>
@@ -215,6 +234,7 @@ const ProjectSubmission = () => {
               value={formData.existingSolutions}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="What exists and why is yours better?"
             />
           </div>
@@ -227,6 +247,7 @@ const ProjectSubmission = () => {
               value={formData.expectedImpact}
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
+              required
               placeholder="What changes after your solution?"
             />
           </div>

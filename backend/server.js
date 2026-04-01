@@ -27,7 +27,7 @@ import { protect } from './middleware/authMiddleware.js';
 const app = express();
  
 // Essential for Vercel/Render proxy to work correctly
-app.set('trust proxy', true); // Trust all upstream proxies (Vercel + Render)
+app.set('trust proxy', 1); // Trust first hop (Render proxy)
 
 // Enable CORS
 const allowedOrigins = [
@@ -59,9 +59,9 @@ app.use(session({
     ttl: 24 * 60 * 60 // 1 day
   }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // true for HTTPS in production
+    secure: true, // Always true for production (Render/Vercel)
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for cross-site in prod
+    sameSite: 'none', // Required for cross-domain cookies (Vercel -> Render)
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));

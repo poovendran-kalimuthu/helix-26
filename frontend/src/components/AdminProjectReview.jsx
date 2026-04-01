@@ -10,6 +10,7 @@ const AdminProjectReview = () => {
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [toggling, setToggling] = useState(false);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
   useEffect(() => {
@@ -54,12 +55,12 @@ const AdminProjectReview = () => {
     <div className="apr-wrapper animate-fade-in">
       <div className="apr-controls glass">
         <div className="apr-header-info">
-          <h2>Project Details Review</h2>
+          <h2>Project Review</h2>
           <p>{event?.title} • {submissions.length} Submissions</p>
         </div>
         
         <div className="apr-toggle-box">
-          <span className="apr-toggle-label">Participants Editing/Submission:</span>
+          <span className="apr-toggle-label">Allow Edits/Submissions:</span>
           <label className="switch">
             <input 
               type="checkbox" 
@@ -72,70 +73,90 @@ const AdminProjectReview = () => {
         </div>
       </div>
 
-      <div className="apr-grid">
+      <div className="apr-tile-grid">
         {submissions.map(sub => (
-          <div key={sub._id} className="apr-card">
-            <div className="apr-team-info">
-              <div>
-                <div className="apr-team-name">{sub.registration?.teamName}</div>
-                <div className="apr-leader">
-                  Leader: {sub.registration?.teamLeader?.name} ({sub.registration?.teamLeader?.registerNumber})
-                </div>
-              </div>
-              <div className="badge badge-accent">Round {sub.registration?.currentRound}</div>
+          <div key={sub._id} className="apr-tile" onClick={() => setSelectedProject(sub)}>
+            <div className="apr-tile-header">
+              <div className="apr-tile-team">{sub.registration?.teamName}</div>
+              <div className="badge badge-accent">R{sub.registration?.currentRound}</div>
+            </div>
+            
+            <div className="apr-tile-meta">
+              <div className="apr-tile-leader">By <strong>{sub.registration?.teamLeader?.name}</strong></div>
+              <p className="apr-tile-preview">{sub.problemStatement}</p>
             </div>
 
-            <div className="apr-details">
-              <div className="apr-section">
-                <span className="apr-section-label">Problem Statement</span>
-                <p className="apr-section-content">{sub.problemStatement}</p>
-              </div>
-              <div className="apr-section">
-                <span className="apr-section-label">Target Users</span>
-                <p className="apr-section-content">{sub.targetUsers}</p>
-              </div>
-              <div className="apr-section">
-                <span className="apr-section-label">Proposed Solution</span>
-                <p className="apr-section-content">{sub.proposedSolution}</p>
-              </div>
-              <div className="apr-section">
-                <span className="apr-section-label">U.S.P / Unique Factor</span>
-                <p className="apr-section-content">{sub.uniqueFactor}</p>
-              </div>
-              <div className="apr-section">
-                <span className="apr-section-label">Revenue Model</span>
-                <p className="apr-section-content">{sub.revenueModel}</p>
-              </div>
-              <div className="apr-section">
-                <span className="apr-section-label">Problem Validation</span>
-                <p className="apr-section-content">{sub.problemValidation}</p>
-              </div>
-              <div className="apr-section">
-                <span className="apr-section-label">Feasibility</span>
-                <p className="apr-section-content">{sub.feasibility}</p>
-              </div>
-              <div className="apr-section">
-                <span className="apr-section-label">Workflow</span>
-                <p className="apr-section-content">{sub.workflow}</p>
-              </div>
-              <div className="apr-section">
-                <span className="apr-section-label">Solutions Gap</span>
-                <p className="apr-section-content">{sub.existingSolutions}</p>
-              </div>
-              <div className="apr-section">
-                <span className="apr-section-label">Expected Impact</span>
-                <p className="apr-section-content">{sub.expectedImpact}</p>
-              </div>
+            <div className="apr-tile-footer">
+              <small style={{ color: 'rgba(255,255,255,0.3)' }}>Click to view full details</small>
+              <div className="btn btn-ghost btn-xs">View →</div>
             </div>
           </div>
         ))}
+
         {submissions.length === 0 && (
           <div className="ae-empty" style={{ gridColumn: '1/-1' }}>
             <span>📭</span>
-            <p>No project details submitted yet.</p>
+            <p>No projects submitted yet.</p>
           </div>
         )}
       </div>
+
+      {/* Project Detail Modal */}
+      {selectedProject && (
+        <div className="apr-modal-overlay" onClick={() => setSelectedProject(null)}>
+          <div className="apr-modal animate-pop-in" onClick={e => e.stopPropagation()}>
+            <div className="apr-modal-header">
+              <div className="apr-modal-title">
+                <h3>{selectedProject.registration?.teamName}</h3>
+                <p className="apr-leader">Leader: {selectedProject.registration?.teamLeader?.name} ({selectedProject.registration?.teamLeader?.registerNumber})</p>
+              </div>
+              <button className="btn btn-circle btn-ghost" onClick={() => setSelectedProject(null)}>✕</button>
+            </div>
+            <div className="apr-modal-body">
+              <div className="apr-section full">
+                <span className="apr-section-label">Problem Statement</span>
+                <p className="apr-section-content">{selectedProject.problemStatement}</p>
+              </div>
+              <div className="apr-section full">
+                <span className="apr-section-label">Proposed Solution</span>
+                <p className="apr-section-content">{selectedProject.proposedSolution}</p>
+              </div>
+              <div className="apr-section">
+                <span className="apr-section-label">Target Users</span>
+                <p className="apr-section-content">{selectedProject.targetUsers}</p>
+              </div>
+              <div className="apr-section">
+                <span className="apr-section-label">Unique Factor</span>
+                <p className="apr-section-content">{selectedProject.uniqueFactor}</p>
+              </div>
+              <div className="apr-section">
+                <span className="apr-section-label">Revenue Model</span>
+                <p className="apr-section-content">{selectedProject.revenueModel}</p>
+              </div>
+              <div className="apr-section">
+                <span className="apr-section-label">Validation</span>
+                <p className="apr-section-content">{selectedProject.problemValidation}</p>
+              </div>
+              <div className="apr-section">
+                <span className="apr-section-label">Feasibility</span>
+                <p className="apr-section-content">{selectedProject.feasibility}</p>
+              </div>
+              <div className="apr-section">
+                <span className="apr-section-label">Existing solutions</span>
+                <p className="apr-section-content">{selectedProject.existingSolutions}</p>
+              </div>
+              <div className="apr-section full">
+                <span className="apr-section-label">Workflow Steps</span>
+                <p className="apr-section-content">{selectedProject.workflow}</p>
+              </div>
+              <div className="apr-section full">
+                <span className="apr-section-label">Expected Impact</span>
+                <p className="apr-section-content">{selectedProject.expectedImpact}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {toast.show && (
         <div className={`ae-toast alert alert-${toast.type} animate-slide-in`}>
