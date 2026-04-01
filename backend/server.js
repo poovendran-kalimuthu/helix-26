@@ -27,7 +27,8 @@ import { protect } from './middleware/authMiddleware.js';
 const app = express();
  
 // Essential for Vercel/Render proxy to work correctly
-app.set('trust proxy', 1); // Trust first hop (Render proxy)
+// Essential for Vercel/Render proxy to work correctly
+app.set('trust proxy', true); // Trust all upstream proxies (Vercel + Render)
 
 // Enable CORS
 const allowedOrigins = [
@@ -50,8 +51,8 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 // Session-Header Injection Middleware (Fix for Brave/Safari cookie blocking)
 app.use((req, res, next) => {
   const sid = req.headers['x-auth-token'] || req.query.sid;
-  if (sid && (!req.headers.cookie || !req.headers.cookie.includes('connect.sid'))) {
-    req.headers.cookie = `connect.sid=${sid}${req.headers.cookie ? '; ' + req.headers.cookie : ''}`;
+  if (sid && (!req.headers.cookie || !req.headers.cookie.includes('token'))) {
+    req.headers.cookie = `token=${sid}${req.headers.cookie ? '; ' + req.headers.cookie : ''}`;
   }
   next();
 });
@@ -69,9 +70,10 @@ app.use(session({
     ttl: 24 * 60 * 60 // 1 day
   }),
   cookie: {
-    secure: process.env.NODE_ENV === 'production', // true for production, false for local
+    // Force secure and sameSite: none if we are on a production URL (HTTPS)
+    secure: process.env.BACKEND_URL?.startsWith('https') || process.env.NODE_ENV === 'production',
     httpOnly: true,
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for prod (HTTPS), 'lax' for local
+    sameSite: (process.env.BACKEND_URL?.startsWith('https') || process.env.NODE_ENV === 'production') ? 'none' : 'lax',
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));

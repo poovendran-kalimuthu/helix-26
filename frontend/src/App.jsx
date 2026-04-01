@@ -22,6 +22,43 @@ import ProtectedRoute from './components/ProtectedRoute';
 // Global config for OAuth persistence as requested by user
 axios.defaults.withCredentials = true;
 
+// Safe LocalStorage Access (Handles cross-domain / Incognito restrictions)
+const getSafeToken = () => {
+  try {
+    return localStorage.getItem('sid');
+  } catch (e) {
+    return null;
+  }
+};
+
+const setSafeToken = (val) => {
+  try {
+    localStorage.setItem('sid', val);
+  } catch (e) {}
+};
+
+// Global Axios Interceptor for Session Fallback (Secondary Layer for Brave/Safari)
+axios.interceptors.request.use(config => {
+  const token = getSafeToken();
+  if (token) {
+    config.headers['x-auth-token'] = token;
+  }
+  return config;
+});
+
+// Capture session ID from URL synchronously (Crucial for fallback scenarios)
+try {
+  const urlParams = new URLSearchParams(window.location.search);
+  const sid = urlParams.get('sid');
+  if (sid) {
+    setSafeToken(sid);
+    const newUrl = window.location.pathname + (window.location.hash || '');
+    window.history.replaceState({}, document.title, newUrl);
+  }
+} catch (e) {
+  console.error("Auth capture error:", e);
+}
+
 function App() {
   return (
     <Router>

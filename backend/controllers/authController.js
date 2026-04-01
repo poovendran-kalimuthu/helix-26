@@ -29,7 +29,7 @@ export const logout = (req, res) => {
     }
     // Destroy the session and clear the cookie
     req.session.destroy();
-    res.clearCookie('connect.sid');
+    res.clearCookie('token');
     // Redirect user back to the login page on the frontend
     res.redirect(process.env.FRONTEND_URL);
   });
