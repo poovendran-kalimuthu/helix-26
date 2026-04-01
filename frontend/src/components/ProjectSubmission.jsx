@@ -236,7 +236,7 @@ const ProjectSubmission = () => {
               onChange={handleChange}
               disabled={!event?.isSubmissionOpen}
               required
-              placeholder="1. Step one\n2. Step two\n3. Step three"
+              placeholder="In de"
             />
           </div>
 

@@ -19,42 +19,8 @@ import ProjectSubmission from './components/ProjectSubmission';
 import AdminProjectReview from './components/AdminProjectReview';
 import ProtectedRoute from './components/ProtectedRoute';
 
-// Safe LocalStorage Access (Handles cross-domain / Incognito restrictions)
-const getSafeToken = () => {
-  try {
-    return localStorage.getItem('sid');
-  } catch (e) {
-    return null;
-  }
-};
-
-const setSafeToken = (val) => {
-  try {
-    localStorage.setItem('sid', val);
-  } catch (e) {}
-};
-
-// Global Axios Interceptor for Session Fallback (Cookie-less Auth Support)
-axios.interceptors.request.use(config => {
-  const token = getSafeToken();
-  if (token) {
-    config.headers['x-auth-token'] = token;
-  }
-  return config;
-});
-
-// Capture session ID from URL synchronously (Crucial for Brave/Safari/iPhone compatibility)
-try {
-  const urlParams = new URLSearchParams(window.location.search);
-  const sid = urlParams.get('sid');
-  if (sid) {
-    setSafeToken(sid);
-    const newUrl = window.location.pathname + (window.location.hash || '');
-    window.history.replaceState({}, document.title, newUrl);
-  }
-} catch (e) {
-  console.error("Auth capture error:", e);
-}
+// Global config for OAuth persistence as requested by user
+axios.defaults.withCredentials = true;
 
 function App() {
   return (

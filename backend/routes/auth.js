@@ -22,7 +22,7 @@ router.get('/google/callback',
         console.error('Session save error:', err);
         return res.redirect(`${process.env.FRONTEND_URL}/login?error=session_loss`);
       }
-      res.redirect(`${process.env.FRONTEND_URL}/dashboard?sid=${req.sessionID}`);
+      res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
     });
   }
 );

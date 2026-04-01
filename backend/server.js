@@ -58,6 +58,7 @@ app.use((req, res, next) => {
 
 // Session Setup - MUST BE BEFORE PASSPORT MIDDLEWARE
 app.use(session({
+  name: 'token', // Exact Name requested by user
   secret: process.env.SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
@@ -68,9 +69,9 @@ app.use(session({
     ttl: 24 * 60 * 60 // 1 day
   }),
   cookie: {
-    secure: true, // Always true for production (Render/Vercel)
+    secure: process.env.NODE_ENV === 'production', // true for production, false for local
     httpOnly: true,
-    sameSite: 'none', // Required for cross-domain cookies (Vercel -> Render)
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', // 'none' for prod (HTTPS), 'lax' for local
     maxAge: 1000 * 60 * 60 * 24 // 24 hours
   }
 }));
