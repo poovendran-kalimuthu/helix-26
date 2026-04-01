@@ -69,14 +69,12 @@ export const checkIn = async (req, res) => {
     }
 
     // --- QUALIFICATION CHECK ---
-    if (roundNumber === 1) {
-      if (!registration.isShortlisted && registration.currentRound < 1) {
-        return res.status(403).json({ success: false, message: 'You are not shortlisted for Round 1' });
-      }
-    } else if (roundNumber > 1) {
-      if (registration.currentRound < roundNumber) {
-        return res.status(403).json({ success: false, message: `You are not qualified for Round ${roundNumber}.` });
-      }
+    // Strict Round Check: User MUST be in the respective round
+    if (registration.currentRound !== roundNumber) {
+      return res.status(403).json({ 
+        success: false, 
+        message: `Attendance is only for participants in Round ${roundNumber}. Your current round is ${registration.currentRound}.` 
+      });
     }
 
     if (registration.isDisqualified) {
@@ -158,17 +156,12 @@ export const markByAdminScan = async (req, res) => {
     }
 
     // --- QUALIFICATION CHECK ---
-    // Round 1: Must be shortlisted OR already in Round 1
-    if (roundNum === 1) {
-      if (!registration.isShortlisted && registration.currentRound < 1) {
-        return res.status(403).json({ success: false, message: 'Participant not shortlisted for Round 1' });
-      }
-    } 
-    // Round N (>1): Must be advanced to at least that round
-    else if (roundNum > 1) {
-      if (registration.currentRound < roundNum) {
-        return res.status(403).json({ success: false, message: `Participant not qualified For Round ${roundNum}. They are currently in Round ${registration.currentRound}.` });
-      }
+    // Strict Round Check: Participant MUST be in the respective round
+    if (registration.currentRound !== roundNum) {
+      return res.status(403).json({ 
+        success: false, 
+        message: `Attendance is only for participants in Round ${roundNum}. This participant is in Round ${registration.currentRound}.` 
+      });
     }
 
     if (registration.isDisqualified) {

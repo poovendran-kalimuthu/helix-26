@@ -160,7 +160,6 @@
   justify-content: center;
   margin: 0 auto 1.25rem;
   box-shadow: 0 8px 24px rgba(99,102,241,0.4);
-  animation: float 4s ease-in-out infinite;
 }
 
 .ln-card-header h2 {
