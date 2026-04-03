@@ -22,6 +22,7 @@ import userRoutes from './routes/users.js';
 import evaluatorRoutes from './routes/evaluator.js';
 import attendanceRoutes from './routes/attendance.js';
 import projectRoutes from './routes/projects.js';
+import feedbackRoutes from './routes/feedbackRoutes.js';
 import { protect } from './middleware/authMiddleware.js';
 
 const app = express();
@@ -90,6 +91,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/evaluator', evaluatorRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/projects', projectRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Example protected route
 app.get('/api/dashboard', protect, (req, res) => {

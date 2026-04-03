@@ -224,6 +224,15 @@ const AdminEvents = () => {
             )}
           </button>
         )}
+        {user?.role === 'admin' && (
+          <button 
+            className="btn btn-secondary" 
+            onClick={() => navigate('/admin/feedback')}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{marginRight: '6px'}}><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Feedbacks
+          </button>
+        )}
       </header>
 
       {/* Flagship Helix Header */}

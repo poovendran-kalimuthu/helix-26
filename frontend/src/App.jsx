@@ -17,6 +17,8 @@ import EvaluatorPortal from './components/EvaluatorPortal';
 import PublicProfile from './components/PublicProfile';
 import ProjectSubmission from './components/ProjectSubmission';
 import AdminProjectReview from './components/AdminProjectReview';
+import Feedback from './components/Feedback';
+import AdminFeedback from './components/AdminFeedback';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Global config for OAuth persistence as requested by user
@@ -81,6 +83,9 @@ function App() {
         <Route path="/admin/events/:id/evaluators" element={<ProtectedRoute><AdminEvaluators /></ProtectedRoute>} />
         <Route path="/admin/events/:id/attendance" element={<ProtectedRoute><AdminAttendance /></ProtectedRoute>} />
         <Route path="/admin/events/:id/project-review" element={<ProtectedRoute><AdminProjectReview /></ProtectedRoute>} />
+        <Route path="/admin/feedback" element={<ProtectedRoute><AdminFeedback /></ProtectedRoute>} />
+        
+        <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
         
         {/* Public/Other Routes */}
         <Route path="/profile/:id" element={<PublicProfile />} />
