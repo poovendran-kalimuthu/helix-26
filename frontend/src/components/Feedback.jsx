@@ -9,7 +9,10 @@ import {
   CheckCircle, 
   Lightbulb,
   Globe,
-  Trophy
+  Trophy,
+  Heart,
+  ThumbsUp,
+  Sparkles
 } from 'lucide-react';
 import { API_URL } from '../config';
 import Loader from './Loader';
@@ -25,7 +28,10 @@ const Feedback = () => {
     siteRating: 5,
     eventComments: '',
     siteComments: '',
-    suggestions: ''
+    suggestions: '',
+    overallSatisfaction: 5,
+    recommendation: 5,
+    preferredNextEvent: ''
   });
   const [message, setMessage] = useState({ type: '', text: '' });
   const navigate = useNavigate();
@@ -75,12 +81,12 @@ const Feedback = () => {
 
   if (loading) return <Loader fullScreen text="Preparing your feedback form..." />;
 
-  const StarRating = ({ value, name, label, color }) => (
+  const StarRating = ({ value, name, label, color, icon: Icon = Star }) => (
     <div className="rating-container" style={{ marginBottom: '1.5rem' }}>
       <label style={{ display: 'block', marginBottom: '0.8rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', fontWeight: '500' }}>
         {label}
       </label>
-      <div style={{ display: 'flex', gap: '10px' }}>
+      <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
@@ -92,18 +98,18 @@ const Feedback = () => {
               cursor: 'pointer', 
               padding: '5px',
               transition: 'transform 0.2s',
-              transform: star <= value ? 'scale(1.2)' : 'scale(1)'
+              transform: star <= value ? 'scale(1.15)' : 'scale(1)'
             }}
           >
-            <Star 
-              size={28} 
+            <Icon 
+              size={24} 
               fill={star <= value ? color : 'transparent'} 
               stroke={star <= value ? color : 'rgba(255,255,255,0.2)'} 
               style={{ filter: star <= value ? `drop-shadow(0 0 8px ${color}44)` : 'none' }}
             />
           </button>
         ))}
-        <span style={{ marginLeft: '10px', fontSize: '1.2rem', fontWeight: '800', color: starRatingColor(value) }}>
+        <span style={{ marginLeft: '8px', fontSize: '1.1rem', fontWeight: '800', color: starRatingColor(value), minWidth: '40px' }}>
           {value}/5
         </span>
       </div>
@@ -117,7 +123,7 @@ const Feedback = () => {
   };
 
   return (
-    <div className="db-wrapper" style={{ background: 'radial-gradient(circle at top left, rgba(99, 102, 241, 0.05), transparent 40%)' }}>
+    <div className="feedback-page-wrapper db-wrapper" style={{ minHeight: '100vh', background: 'radial-gradient(circle at top left, rgba(99, 102, 241, 0.05), transparent 40%)' }}>
       {/* ── Navbar ── */}
       <nav className="db-nav glass animate-fade-in">
         <div className="db-nav-brand" onClick={() => navigate('/dashboard')} style={{cursor: 'pointer'}}>
@@ -128,54 +134,54 @@ const Feedback = () => {
         </div>
         <div className="db-nav-right">
            <button className="btn btn-ghost btn-sm" onClick={() => navigate('/dashboard')} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-             <ArrowLeft size={16} /> Back
+             <ArrowLeft size={16} /> <span className="hide-mobile">Back to Dashboard</span>
            </button>
         </div>
       </nav>
 
-      <div className="container" style={{ maxWidth: '850px', margin: '4rem auto', padding: '0 1.5rem' }}>
-        <div className="glass animate-fade-in-up" style={{ padding: '3rem', borderRadius: '2rem', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+      <div className="feedback-container container" style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1rem' }}>
+        <div className="feedback-card glass animate-fade-in-up" style={{ padding: '2rem', borderRadius: '1.5rem', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
           
-          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-            <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '1.5rem', color: '#818cf8', marginBottom: '1.5rem' }}>
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <div style={{ display: 'inline-flex', padding: '0.8rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '1.2rem', color: '#818cf8', marginBottom: '1rem' }}>
               <MessageSquare size={32} />
             </div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Help Us Grow 🚀</h1>
-            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.1rem' }}>Your insights shape the future of Spectrum and our engineering community.</p>
+            <h1 className="feedback-title" style={{ fontSize: '2rem', fontWeight: '900', marginBottom: '0.5rem', color: '#fff' }}>Help Us Grow 🚀</h1>
+            <p className="feedback-subtitle" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1rem' }}>Your insights shape the future of Spectrum.</p>
           </div>
 
           {message.text && (
-            <div className="animate-fade-in" style={{ marginBottom: '2rem', padding: '1.2rem', borderRadius: '1rem', background: message.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${message.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`, color: '#fff', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-              {message.type === 'success' ? <CheckCircle size={20} color="#10b981" /> : <div style={{color: '#ef4444'}}>⚠️</div>}
-              <span style={{ fontWeight: '500' }}>{message.text}</span>
+            <div className="animate-fade-in" style={{ marginBottom: '2rem', padding: '1rem', borderRadius: '0.8rem', background: message.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${message.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
+              {message.type === 'success' ? <CheckCircle size={18} color="#10b981" /> : <div style={{color: '#ef4444'}}>⚠️</div>}
+              <span style={{ fontWeight: '500', fontSize: '0.9rem' }}>{message.text}</span>
             </div>
           )}
 
           <form onSubmit={handleSubmit}>
             {/* Section 1: Event Experience */}
-            <div className="form-section animate-fade-in-up stagger-1" style={{ marginBottom: '3rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <Trophy size={20} color="#818cf8" />
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#818cf8' }}>Event Experience</h3>
+            <div className="form-section animate-fade-in-up" style={{ marginBottom: '2.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.2rem' }}>
+                <Trophy size={18} color="#818cf8" />
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#818cf8' }}>Event Experience</h3>
               </div>
               
-              <div className="form-group" style={{ marginBottom: '2rem' }}>
-                <label className="form-label">Which event did you participate in?</label>
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label" style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', marginBottom: '0.5rem', display: 'block' }}>Which event did you participate in?</label>
                 <div style={{ position: 'relative' }}>
                   <select 
                     name="eventId" 
                     className="form-control glass" 
                     value={formData.eventId} 
                     onChange={handleChange}
-                    style={{ width: '100%', padding: '1rem 1.2rem', borderRadius: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', appearance: 'none', cursor: 'pointer' }}
+                    style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', appearance: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
                   >
-                    <option value="" style={{background: '#0a0a0a'}}>General Website Feedback Only</option>
+                    <option value="" style={{background: '#0a0a0a'}}>Platform Feedback Only</option>
                     {events.map(event => (
                       <option key={event._id} value={event._id} style={{background: '#0a0a0a'}}>{event.title}</option>
                     ))}
                   </select>
-                  <div style={{ position: 'absolute', right: '1.2rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  <div style={{ position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
                   </div>
                 </div>
               </div>
@@ -183,7 +189,7 @@ const Feedback = () => {
               {formData.eventId && (
                 <div className="animate-fade-in">
                   <StarRating 
-                    label="Rate the event organization and experience" 
+                    label="Rate the event organization" 
                     name="eventRating" 
                     value={formData.eventRating} 
                     color="#818cf8"
@@ -193,10 +199,10 @@ const Feedback = () => {
                       name="eventComments" 
                       className="form-control glass" 
                       rows="3" 
-                      placeholder="What was the best part of this event? Any technical glitches?"
+                      placeholder="Best parts? Technical issues?"
                       value={formData.eventComments}
                       onChange={handleChange}
-                      style={{ width: '100%', padding: '1.2rem', borderRadius: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none' }}
+                      style={{ width: '100%', padding: '1rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none', fontSize: '0.9rem' }}
                     ></textarea>
                   </div>
                 </div>
@@ -204,14 +210,14 @@ const Feedback = () => {
             </div>
 
             {/* Section 2: Platform Feedback */}
-            <div className="form-section animate-fade-in-up stagger-2" style={{ marginBottom: '3rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <Globe size={20} color="#a855f7" />
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#a855f7' }}>Platform & Website</h3>
+            <div className="form-section animate-fade-in-up" style={{ marginBottom: '2.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.2rem' }}>
+                <Globe size={18} color="#a855f7" />
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#a855f7' }}>Platform & Website</h3>
               </div>
               
               <StarRating 
-                label="How would you rate the Spectrum portal?" 
+                label="Overall website experience" 
                 name="siteRating" 
                 value={formData.siteRating} 
                 color="#a855f7"
@@ -222,42 +228,80 @@ const Feedback = () => {
                   name="siteComments" 
                   className="form-control glass" 
                   rows="3" 
-                  placeholder="How was the registration process? Was the dashboard helpful?"
+                  placeholder="How was the dashboard and registration?"
                   value={formData.siteComments}
                   onChange={handleChange}
-                  style={{ width: '100%', padding: '1.2rem', borderRadius: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none' }}
+                  style={{ width: '100%', padding: '1rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none', fontSize: '0.9rem' }}
                 ></textarea>
               </div>
             </div>
 
-            {/* Section 3: Vision */}
-            <div className="form-section animate-fade-in-up stagger-3" style={{ marginBottom: '3.5rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-                <Lightbulb size={20} color="#fbbf24" />
-                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#fbbf24' }}>Suggestions for HELIX'26</h3>
+            {/* Section 3: Overall Satisfaction (NEW) */}
+            <div className="form-section animate-fade-in-up" style={{ marginBottom: '2.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.2rem' }}>
+                <Heart size={18} color="#ec4899" />
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#ec4899' }}>Overall Feel</h3>
               </div>
+              
+              <StarRating 
+                label="Overall satisfaction with HELIX'26" 
+                name="overallSatisfaction" 
+                value={formData.overallSatisfaction} 
+                color="#ec4899"
+                icon={Heart}
+              />
+
+              <StarRating 
+                label="How likely are you to recommend Spectrum to others?" 
+                name="recommendation" 
+                value={formData.recommendation} 
+                color="#10b981"
+                icon={ThumbsUp}
+              />
+            </div>
+
+            {/* Section 4: Vision */}
+            <div className="form-section animate-fade-in-up" style={{ marginBottom: '2.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1.2rem' }}>
+                <Lightbulb size={18} color="#fbbf24" />
+                <h3 style={{ fontSize: '1rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#fbbf24' }}>Suggestions & Vision</h3>
+              </div>
+              
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label className="form-label" style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.7)', marginBottom: '0.5rem', display: 'block' }}>What kind of events would you like to see next time?</label>
+                <input 
+                  type="text"
+                  name="preferredNextEvent"
+                  className="form-control glass"
+                  placeholder="e.g., Robotics Workshop, Hackathon, AI Panel..."
+                  value={formData.preferredNextEvent}
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: '0.8rem 1rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.9rem' }}
+                />
+              </div>
+
               <div className="form-group">
                  <textarea 
                   name="suggestions" 
                   className="form-control glass" 
-                  rows="4" 
-                  placeholder="Any features you'd like to see next? Or events we should bring back?"
+                  rows="3" 
+                  placeholder="Any other improvements for us?"
                   value={formData.suggestions}
                   onChange={handleChange}
-                  style={{ width: '100%', padding: '1.2rem', borderRadius: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none' }}
+                  style={{ width: '100%', padding: '1rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none', fontSize: '0.9rem' }}
                 ></textarea>
               </div>
             </div>
 
             <button 
               type="submit" 
-              className="btn btn-primary btn-block animate-fade-in-up stagger-4" 
+              className="btn btn-primary btn-block animate-fade-in-up" 
               disabled={submitting}
-              style={{ width: '100%', padding: '1.2rem', borderRadius: '1.2rem', fontSize: '1.2rem', fontWeight: '800', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.8rem', boxShadow: '0 10px 30px rgba(99, 102, 241, 0.4)', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
+              style={{ width: '100%', padding: '1rem', borderRadius: '1rem', fontSize: '1.1rem', fontWeight: '800', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.6rem', boxShadow: '0 10px 25px rgba(99, 102, 241, 0.4)', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
             >
-              {submitting ? 'Transmitting Data...' : (
+              {submitting ? 'Submitting...' : (
                 <>
-                  Submit Response <Send size={20} />
+                  Send Feedback <Send size={18} />
                 </>
               )}
             </button>
@@ -266,8 +310,29 @@ const Feedback = () => {
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
+        @media (max-width: 640px) {
+          .feedback-container {
+            margin: 1rem auto !important;
+          }
+          .feedback-card {
+            padding: 1.5rem !important;
+            border-radius: 1rem !important;
+          }
+          .feedback-title {
+            font-size: 1.6rem !important;
+          }
+          .hide-mobile {
+            display: none !important;
+          }
+          .rating-container label {
+            font-size: 0.8rem !important;
+          }
+          .rating-container span {
+            font-size: 0.9rem !important;
+          }
+        }
         .rating-container button:hover {
-          transform: scale(1.3) !important;
+          transform: scale(1.2) !important;
         }
         .form-control:focus {
            background: rgba(255,255,255,0.06) !important;

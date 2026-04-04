@@ -7,7 +7,17 @@ import Event from '../models/Event.js';
 // @access  Private
 export const submitFeedback = async (req, res) => {
   try {
-    const { eventId, eventRating, siteRating, eventComments, siteComments, suggestions } = req.body;
+    const { 
+      eventId, 
+      eventRating, 
+      siteRating, 
+      eventComments, 
+      siteComments, 
+      suggestions,
+      overallSatisfaction,
+      recommendation,
+      preferredNextEvent
+    } = req.body;
 
     const feedback = await Feedback.create({
       user: req.user._id,
@@ -16,7 +26,10 @@ export const submitFeedback = async (req, res) => {
       siteRating,
       eventComments,
       siteComments,
-      suggestions
+      suggestions,
+      overallSatisfaction,
+      recommendation,
+      preferredNextEvent
     });
 
     res.status(201).json({ success: true, data: feedback });
