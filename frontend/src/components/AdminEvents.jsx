@@ -93,6 +93,7 @@ const AdminEvents = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [user, setUser] = useState(null);
   const [toast, setToast] = useState({ text: '', type: '' });
+  const [formData, setFormData] = useState(EMPTY_FORM);
 
   useEffect(() => { 
     fetchUser();
