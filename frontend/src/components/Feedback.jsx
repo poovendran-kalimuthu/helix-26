@@ -28,6 +28,7 @@ const Feedback = () => {
     siteRating: 5,
     eventComments: '',
     siteComments: '',
+    siteTechnicalIssues: '',
     suggestions: '',
     overallSatisfaction: 5,
     recommendation: 5,
@@ -230,6 +231,18 @@ const Feedback = () => {
                   rows="3" 
                   placeholder="How was the dashboard and registration?"
                   value={formData.siteComments}
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: '1rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none', fontSize: '0.9rem' }}
+                ></textarea>
+              </div>
+
+              <div className="form-group" style={{ marginTop: '1rem' }}>
+                <textarea 
+                  name="siteTechnicalIssues" 
+                  className="form-control glass" 
+                  rows="2" 
+                  placeholder="Any technical issues or bugs encountered?"
+                  value={formData.siteTechnicalIssues}
                   onChange={handleChange}
                   style={{ width: '100%', padding: '1rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none', fontSize: '0.9rem' }}
                 ></textarea>

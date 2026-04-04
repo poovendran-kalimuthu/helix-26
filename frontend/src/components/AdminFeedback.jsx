@@ -88,7 +88,7 @@ const AdminFeedback = () => {
       `${f.user?.name}\n${f.user?.email}\n${f.user?.department} - ${f.user?.year}yr`,
       f.event?.title || 'Platform Only',
       `Event: ${f.eventRating || 0}/5\nSite: ${f.siteRating || 0}/5\nOverall: ${f.overallSatisfaction || 0}/5\nRecommend: ${f.recommendation || 0}/5`,
-      `Event: ${f.eventComments || '-'}\n\nSite: ${f.siteComments || '-'}`,
+      `Event: ${f.eventComments || '-'}\n\nSite: ${f.siteComments || '-'}\n\nTech: ${f.siteTechnicalIssues || '-'}`,
       `Sug: ${f.suggestions || '-'}\n\nNext: ${f.preferredNextEvent || '-'}`
     ]);
 
@@ -266,6 +266,7 @@ const AdminFeedback = () => {
                         <div style={{ maxWidth: '350px', fontSize: '0.8rem' }}>
                           {f.eventComments && <div style={{ color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', marginBottom: '4px' }}>• {f.eventComments}</div>}
                           {f.siteComments && <div style={{ color: 'rgba(255,255,255,0.7)', fontStyle: 'italic', marginBottom: '4px' }}>• {f.siteComments}</div>}
+                          {f.siteTechnicalIssues && <div style={{ color: '#ef4444', fontStyle: 'italic', marginBottom: '4px' }}>⚠️ {f.siteTechnicalIssues}</div>}
                           {f.suggestions && <div style={{ color: '#fbbf24', fontWeight: '500' }}>💡 {f.suggestions}</div>}
                           {f.preferredNextEvent && <div style={{ color: '#10b981', fontWeight: '500', marginTop: '4px' }}>🎯 Next: {f.preferredNextEvent}</div>}
                         </div>
