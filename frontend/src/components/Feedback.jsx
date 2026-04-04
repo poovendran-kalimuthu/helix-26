@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { 
+  MessageSquare, 
+  Star, 
+  Send, 
+  ArrowLeft, 
+  CheckCircle, 
+  Lightbulb,
+  Globe,
+  Trophy
+} from 'lucide-react';
 import { API_URL } from '../config';
 import Loader from './Loader';
-import './Dashboard.css'; // Reusing some glass styles
-import './EventDetails.css'; // Reusing form styles
+import './Dashboard.css';
 
 const Feedback = () => {
   const [events, setEvents] = useState([]);
@@ -42,6 +51,10 @@ const Feedback = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const setRating = (name, val) => {
+    setFormData({ ...formData, [name]: val });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -50,8 +63,8 @@ const Feedback = () => {
     try {
       const res = await axios.post(`${API_URL}/api/feedback`, formData);
       if (res.data.success) {
-        setMessage({ type: 'success', text: 'Thank you for your feedback!' });
-        setTimeout(() => navigate('/dashboard'), 2000);
+        setMessage({ type: 'success', text: 'Thank you! Your feedback has been recorded.' });
+        setTimeout(() => navigate('/dashboard'), 2500);
       }
     } catch (error) {
       setMessage({ type: 'error', text: error.response?.data?.message || 'Failed to submit feedback' });
@@ -60,10 +73,52 @@ const Feedback = () => {
     }
   };
 
-  if (loading) return <Loader fullScreen text="Loading Feedback Form..." />;
+  if (loading) return <Loader fullScreen text="Preparing your feedback form..." />;
+
+  const StarRating = ({ value, name, label, color }) => (
+    <div className="rating-container" style={{ marginBottom: '1.5rem' }}>
+      <label style={{ display: 'block', marginBottom: '0.8rem', color: 'rgba(255,255,255,0.7)', fontSize: '0.9rem', fontWeight: '500' }}>
+        {label}
+      </label>
+      <div style={{ display: 'flex', gap: '10px' }}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <button
+            key={star}
+            type="button"
+            onClick={() => setRating(name, star)}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              cursor: 'pointer', 
+              padding: '5px',
+              transition: 'transform 0.2s',
+              transform: star <= value ? 'scale(1.2)' : 'scale(1)'
+            }}
+          >
+            <Star 
+              size={28} 
+              fill={star <= value ? color : 'transparent'} 
+              stroke={star <= value ? color : 'rgba(255,255,255,0.2)'} 
+              style={{ filter: star <= value ? `drop-shadow(0 0 8px ${color}44)` : 'none' }}
+            />
+          </button>
+        ))}
+        <span style={{ marginLeft: '10px', fontSize: '1.2rem', fontWeight: '800', color: starRatingColor(value) }}>
+          {value}/5
+        </span>
+      </div>
+    </div>
+  );
+
+  const starRatingColor = (val) => {
+    if (val >= 4) return '#10b981';
+    if (val >= 3) return '#fbbf24';
+    return '#ef4444';
+  };
 
   return (
-    <div className="db-wrapper">
+    <div className="db-wrapper" style={{ background: 'radial-gradient(circle at top left, rgba(99, 102, 241, 0.05), transparent 40%)' }}>
+      {/* ── Navbar ── */}
       <nav className="db-nav glass animate-fade-in">
         <div className="db-nav-brand" onClick={() => navigate('/dashboard')} style={{cursor: 'pointer'}}>
           <div className="db-logo">
@@ -72,142 +127,154 @@ const Feedback = () => {
           <span className="db-brand-name">Spectrum</span>
         </div>
         <div className="db-nav-right">
-           <button className="btn btn-ghost" onClick={() => navigate('/dashboard')}>Back to Dashboard</button>
+           <button className="btn btn-ghost btn-sm" onClick={() => navigate('/dashboard')} style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+             <ArrowLeft size={16} /> Back
+           </button>
         </div>
       </nav>
 
-      <div className="container" style={{ maxWidth: '800px', margin: '2rem auto', padding: '0 1rem' }}>
-        <div className="glass animate-fade-in-up" style={{ padding: '2rem', borderRadius: '1.5rem' }}>
-          <h1 style={{ marginBottom: '0.5rem', color: '#fff' }}>Share Your Experience 📝</h1>
-          <p style={{ color: 'rgba(255,255,255,0.7)', marginBottom: '2rem' }}>Your feedback helps us improve Spectrum and make future events even better.</p>
+      <div className="container" style={{ maxWidth: '850px', margin: '4rem auto', padding: '0 1.5rem' }}>
+        <div className="glass animate-fade-in-up" style={{ padding: '3rem', borderRadius: '2rem', border: '1px solid rgba(255,255,255,0.08)', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)' }}>
+          
+          <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+            <div style={{ display: 'inline-flex', padding: '1rem', background: 'rgba(99, 102, 241, 0.1)', borderRadius: '1.5rem', color: '#818cf8', marginBottom: '1.5rem' }}>
+              <MessageSquare size={32} />
+            </div>
+            <h1 style={{ fontSize: '2.5rem', fontWeight: '900', marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>Help Us Grow 🚀</h1>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '1.1rem' }}>Your insights shape the future of Spectrum and our engineering community.</p>
+          </div>
 
           {message.text && (
-            <div className={`alert alert-${message.type}`} style={{ marginBottom: '1.5rem', padding: '1rem', borderRadius: '0.5rem', background: message.type === 'success' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)', color: '#fff', border: `1px solid ${message.type === 'success' ? '#10b981' : '#ef4444'}` }}>
-              {message.text}
+            <div className="animate-fade-in" style={{ marginBottom: '2rem', padding: '1.2rem', borderRadius: '1rem', background: message.type === 'success' ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', border: `1px solid ${message.type === 'success' ? 'rgba(16,185,129,0.3)' : 'rgba(239,68,68,0.3)'}`, color: '#fff', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+              {message.type === 'success' ? <CheckCircle size={20} color="#10b981" /> : <div style={{color: '#ef4444'}}>⚠️</div>}
+              <span style={{ fontWeight: '500' }}>{message.text}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="feedback-form">
-            <div className="form-section" style={{ marginBottom: '2.5rem' }}>
-              <h3 style={{ color: '#818cf8', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Event Feedback</h3>
-              
-              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.9)' }}>Select Event</label>
-                <select 
-                  name="eventId" 
-                  className="form-control" 
-                  value={formData.eventId} 
-                  onChange={handleChange}
-                  style={{ width: '100%', padding: '0.8rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
-                >
-                  <option value="" style={{background: '#1a1a1a'}}>Select an event you participated in</option>
-                  {events.map(event => (
-                    <option key={event._id} value={event._id} style={{background: '#1a1a1a'}}>{event.title}</option>
-                  ))}
-                </select>
-                <small style={{ color: 'rgba(255,255,255,0.5)', marginTop: '0.3rem', display: 'block' }}>Only events you registered for are shown here.</small>
+          <form onSubmit={handleSubmit}>
+            {/* Section 1: Event Experience */}
+            <div className="form-section animate-fade-in-up stagger-1" style={{ marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <Trophy size={20} color="#818cf8" />
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#818cf8' }}>Event Experience</h3>
               </div>
-
-              {formData.eventId && (
-                <>
-                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.9)' }}>Event Rating (1-5)</label>
-                    <input 
-                      type="range" 
-                      name="eventRating" 
-                      min="1" max="5" 
-                      value={formData.eventRating} 
-                      onChange={handleChange}
-                      style={{ width: '100%', accentColor: '#818cf8' }}
-                    />
-                    <div style={{ display: 'flex', justifyContent: 'space-between', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
-                      <span>Poor</span>
-                      <span style={{color: '#fbbf24', fontWeight: 'bold'}}>{'⭐'.repeat(formData.eventRating)}</span>
-                      <span>Excellent</span>
-                    </div>
-                  </div>
-
-                  <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                    <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.9)' }}>Comments about the Event</label>
-                    <textarea 
-                      name="eventComments" 
-                      className="form-control" 
-                      rows="3" 
-                      placeholder="What did you like or dislike?"
-                      value={formData.eventComments}
-                      onChange={handleChange}
-                      style={{ width: '100%', padding: '0.8rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'vertical' }}
-                    ></textarea>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="form-section" style={{ marginBottom: '2.5rem' }}>
-              <h3 style={{ color: '#c084fc', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>Website Feedback</h3>
               
-              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.9)' }}>Website Experience Rating (1-5)</label>
-                <input 
-                  type="range" 
-                  name="siteRating" 
-                  min="1" max="5" 
-                  value={formData.siteRating} 
-                  onChange={handleChange}
-                  style={{ width: '100%', accentColor: '#c084fc' }}
-                />
-                <div style={{ display: 'flex', justifyContent: 'space-between', color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem' }}>
-                  <span>Poor</span>
-                  <span style={{color: '#fbbf24', fontWeight: 'bold'}}>{'⭐'.repeat(formData.siteRating)}</span>
-                  <span>Excellent</span>
+              <div className="form-group" style={{ marginBottom: '2rem' }}>
+                <label className="form-label">Which event did you participate in?</label>
+                <div style={{ position: 'relative' }}>
+                  <select 
+                    name="eventId" 
+                    className="form-control glass" 
+                    value={formData.eventId} 
+                    onChange={handleChange}
+                    style={{ width: '100%', padding: '1rem 1.2rem', borderRadius: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', appearance: 'none', cursor: 'pointer' }}
+                  >
+                    <option value="" style={{background: '#0a0a0a'}}>General Website Feedback Only</option>
+                    {events.map(event => (
+                      <option key={event._id} value={event._id} style={{background: '#0a0a0a'}}>{event.title}</option>
+                    ))}
+                  </select>
+                  <div style={{ position: 'absolute', right: '1.2rem', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', opacity: 0.5 }}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>
+                  </div>
                 </div>
               </div>
 
-              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', color: 'rgba(255,255,255,0.9)' }}>Comments about the Website</label>
+              {formData.eventId && (
+                <div className="animate-fade-in">
+                  <StarRating 
+                    label="Rate the event organization and experience" 
+                    name="eventRating" 
+                    value={formData.eventRating} 
+                    color="#818cf8"
+                  />
+                  <div className="form-group">
+                     <textarea 
+                      name="eventComments" 
+                      className="form-control glass" 
+                      rows="3" 
+                      placeholder="What was the best part of this event? Any technical glitches?"
+                      value={formData.eventComments}
+                      onChange={handleChange}
+                      style={{ width: '100%', padding: '1.2rem', borderRadius: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none' }}
+                    ></textarea>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Section 2: Platform Feedback */}
+            <div className="form-section animate-fade-in-up stagger-2" style={{ marginBottom: '3rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <Globe size={20} color="#a855f7" />
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#a855f7' }}>Platform & Website</h3>
+              </div>
+              
+              <StarRating 
+                label="How would you rate the Spectrum portal?" 
+                name="siteRating" 
+                value={formData.siteRating} 
+                color="#a855f7"
+              />
+
+              <div className="form-group">
                 <textarea 
                   name="siteComments" 
-                  className="form-control" 
+                  className="form-control glass" 
                   rows="3" 
-                  placeholder="How was your experience using the platform?"
+                  placeholder="How was the registration process? Was the dashboard helpful?"
                   value={formData.siteComments}
                   onChange={handleChange}
-                  style={{ width: '100%', padding: '0.8rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'vertical' }}
+                  style={{ width: '100%', padding: '1.2rem', borderRadius: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none' }}
                 ></textarea>
               </div>
             </div>
 
-            <div className="form-section" style={{ marginBottom: '2.5rem' }}>
-              <h3 style={{ color: '#fbbf24', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '0.5rem' }}>General Suggestions</h3>
+            {/* Section 3: Vision */}
+            <div className="form-section animate-fade-in-up stagger-3" style={{ marginBottom: '3.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
+                <Lightbulb size={20} color="#fbbf24" />
+                <h3 style={{ fontSize: '1.2rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#fbbf24' }}>Suggestions for HELIX'26</h3>
+              </div>
               <div className="form-group">
-                <textarea 
+                 <textarea 
                   name="suggestions" 
-                  className="form-control" 
+                  className="form-control glass" 
                   rows="4" 
-                  placeholder="Any other suggestions for improvement?"
+                  placeholder="Any features you'd like to see next? Or events we should bring back?"
                   value={formData.suggestions}
                   onChange={handleChange}
-                  style={{ width: '100%', padding: '0.8rem', borderRadius: '0.8rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'vertical' }}
+                  style={{ width: '100%', padding: '1.2rem', borderRadius: '1rem', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', resize: 'none' }}
                 ></textarea>
               </div>
             </div>
 
             <button 
               type="submit" 
-              className="btn btn-primary btn-block btn-lg" 
+              className="btn btn-primary btn-block animate-fade-in-up stagger-4" 
               disabled={submitting}
-              style={{ width: '100%', padding: '1rem', fontSize: '1.1rem', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}
+              style={{ width: '100%', padding: '1.2rem', borderRadius: '1.2rem', fontSize: '1.2rem', fontWeight: '800', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.8rem', boxShadow: '0 10px 30px rgba(99, 102, 241, 0.4)', background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)' }}
             >
-              {submitting ? 'Submitting...' : (
+              {submitting ? 'Transmitting Data...' : (
                 <>
-                  Submit Feedback
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  Submit Response <Send size={20} />
                 </>
               )}
             </button>
           </form>
         </div>
       </div>
+
+      <style dangerouslySetInnerHTML={{ __html: `
+        .rating-container button:hover {
+          transform: scale(1.3) !important;
+        }
+        .form-control:focus {
+           background: rgba(255,255,255,0.06) !important;
+           border-color: rgba(129, 140, 248, 0.4) !important;
+           outline: none;
+        }
+      `}} />
     </div>
   );
 };
