@@ -14,7 +14,9 @@ import {
   Search,
   Heart,
   ThumbsUp,
-  TrendingUp
+  TrendingUp,
+  Trophy,
+  Globe
 } from 'lucide-react';
 import { API_URL } from '../config';
 import Loader from './Loader';
