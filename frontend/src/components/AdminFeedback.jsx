@@ -141,7 +141,7 @@ const AdminFeedback = () => {
       <header className="ae-header glass animate-fade-in header-responsive" style={{ justifyContent: 'space-between', padding: '1rem 2rem' }}>
         <div className="ae-header-left" style={{ gap: '1.5rem' }}>
           <button className="btn btn-ghost btn-sm" onClick={() => navigate('/admin/events')} style={{ display: 'flex', gap: '0.4rem', alignItems: 'center' }}>
-            <ArrowLeft size={16} /> <span className="hide-mobile">Dashboard</span>
+            <ArrowLeft size={16} /> Dashboard
           </button>
           <div className="header-text">
             <h1 className="ae-title feedback-mgmt-title" style={{ fontSize: '1.8rem', fontWeight: '800', letterSpacing: '-0.02em', background: 'linear-gradient(135deg, #fff 0%, #818cf8 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
@@ -167,7 +167,7 @@ const AdminFeedback = () => {
              disabled={feedbacks.length === 0}
              style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', borderRadius: '0.8rem', padding: '0.6rem 1.2rem', fontSize: '0.9rem' }}
            >
-             <Download size={16} /> <span className="hide-mobile">Export PDF</span>
+             <Download size={16} /> Export PDF
            </button>
         </div>
       </header>
@@ -176,7 +176,7 @@ const AdminFeedback = () => {
       <div className="container" style={{ maxWidth: '1400px', margin: '2rem auto', padding: '0 1.5rem' }}>
         
         {/* Statistics Bar */}
-        <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.2rem', marginBottom: '2rem' }}>
+        <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.2rem', marginBottom: '2rem' }}>
           <div className="glass animate-fade-in-up" style={{ padding: '1.2rem', borderRadius: '1rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div style={{ padding: '0.6rem', background: 'rgba(129, 140, 248, 0.1)', color: '#818cf8', borderRadius: '0.8rem' }}><MessageSquare size={20}/></div>
             <div>
@@ -291,15 +291,16 @@ const AdminFeedback = () => {
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
+        @media (max-width: 1024px) {
+          .stats-grid {
+             grid-template-columns: repeat(2, 1fr) !important;
+          }
+        }
         @media (max-width: 768px) {
           .header-responsive {
-            padding: 0.8rem 1rem !important;
-            flex-direction: column;
-            gap: 1rem;
-            align-items: flex-start !important;
+            padding: 1rem !important;
           }
           .ae-header-left {
-             width: 100%;
              gap: 1rem !important;
           }
           .ae-header-actions {
