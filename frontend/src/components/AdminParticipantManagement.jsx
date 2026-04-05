@@ -594,7 +594,7 @@ const AdminParticipantManagement = () => {
             />
           </div>
           <button className="btn btn-outline btn-sm" onClick={generateODList}>📄 Export OD List (PDF)</button>
-          {isJuryRound && (
+          {activeRoundNum !== null && (
             <button className="btn btn-accent btn-sm" onClick={generateEvaluationReport}>🏆 Export Evaluation Report</button>
           )}
         </div>
