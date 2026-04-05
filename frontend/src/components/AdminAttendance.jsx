@@ -4,6 +4,8 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import Loader from './Loader';
 import { QRCodeCanvas } from 'qrcode.react';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import './AdminEvents.css';
 import AttendanceScanner from './AttendanceScanner';
 
@@ -93,6 +95,73 @@ const AdminAttendance = () => {
     } catch { showToast('Manual mark failed.', 'error'); }
   };
 
+  const generateAttendancePDF = () => {
+    const doc = new jsPDF();
+    const tableColumn = ["S.No", "Roll No", "Student Name", "Team Name", "Status", "Last Log"];
+    
+    const tableRows = [];
+    let sNo = 1;
+
+    // Flatten members and their attendance status
+    registrations.forEach(reg => {
+      reg.members.forEach(member => {
+        const user = member.user;
+        const lastLog = reg.attendance?.filter(a => a.user.toString() === user._id.toString()).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+        const isPresent = reg.attendance?.some(a => a.user.toString() === user._id.toString() && a.status === 'Present');
+
+        tableRows.push([
+          sNo++,
+          user.registerNumber || 'N/A',
+          user.name || 'N/A',
+          reg.teamName || 'Unnamed',
+          isPresent ? 'PRESENT' : 'ABSENT',
+          lastLog ? new Date(lastLog.timestamp).toLocaleTimeString() : 'N/A'
+        ]);
+      });
+    });
+
+    // Branding Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.setTextColor(33, 33, 33);
+    doc.text("Dr. Mahalingam College of Engineering and Technology", 105, 15, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.text("ECE Department Association - SPECTRUM", 105, 22, { align: 'center' });
+
+    doc.setDrawColor(200);
+    doc.line(20, 26, 190, 26);
+
+    doc.setFontSize(16);
+    doc.setTextColor(40, 44, 52);
+    doc.text("ATTENDANCE VERIFICATION REPORT", 105, 36, { align: 'center' });
+
+    doc.setFontSize(12);
+    doc.setTextColor(63, 81, 181);
+    doc.text(event?.title || 'Event Attendance', 105, 43, { align: 'center' });
+
+    doc.setFontSize(9);
+    doc.setTextColor(100);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 105, 50, { align: 'center' });
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 58,
+      theme: 'grid',
+      styles: { fontSize: 9, halign: 'center', valign: 'middle' },
+      headStyles: { fillColor: [63, 81, 181], textColor: 255 },
+      columnStyles: {
+        2: { halign: 'left' }, // Name
+        3: { halign: 'left' }  // Team
+      }
+    });
+
+    doc.save(`${event?.title}_Attendance_Report.pdf`);
+  };
+
   if (!loading && !event) return <div className="ae-error"><h2>Event not found</h2><button onClick={() => navigate('/admin/events')}>Back</button></div>;
 
   return (
@@ -114,6 +183,7 @@ const AdminAttendance = () => {
             <button className="btn btn-primary btn-sm" onClick={() => setShowAdminScanner(true)}>
               📷 Scan Participant
             </button>
+            <button className="btn btn-outline btn-sm" onClick={generateAttendancePDF}>📄 Export PDF</button>
             <button className="btn btn-outline btn-sm" onClick={() => window.print()}>🖨️ Print Report</button>
         </div>
       </header>

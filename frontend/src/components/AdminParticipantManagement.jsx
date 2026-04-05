@@ -387,6 +387,97 @@ const AdminParticipantManagement = () => {
     doc.save(`${event?.title}_Full_OD_List.pdf`);
   };
 
+  const generateEvaluationReport = () => {
+    if (!activeRoundNum) return showToast('Please select a specific round first', 'error');
+    
+    const doc = new jsPDF();
+    const tableColumn = ["S.No", "Team Name", "Members", "Judge", "Score"];
+    
+    const tableRows = [];
+    const rowSpans = [];
+    let sNo = 1;
+    let rowIndex = 0;
+
+    filteredRegistrations.forEach(reg => {
+      const teamScoreInfo = getTeamScoreInfo(reg._id);
+      if (!teamScoreInfo) return; // Skip if no scores
+
+      const scores = teamScoreInfo.all;
+      const mCount = scores.length;
+      
+      rowSpans.push({ index: rowIndex, span: mCount });
+      
+      scores.forEach((s, idx) => {
+        const judgeName = s.evaluator?.name || 'Unknown';
+        const totalScore = s.totalScore;
+        const criteriaList = s.scores.map(m => `${m.criteriaName}: ${m.score}`).join('\n');
+        const remarks = s.remarks ? `\nRemarks: ${s.remarks}` : '';
+
+        tableRows.push([
+          idx === 0 ? sNo++ : '',
+          idx === 0 ? reg.teamName : '',
+          idx === 0 ? reg.members.map(m => m.user?.name).join(', ') : '',
+          judgeName,
+          `${totalScore}\n(${criteriaList})${remarks}`
+        ]);
+      });
+      rowIndex += mCount;
+    });
+
+    if (tableRows.length === 0) {
+      showToast('No scores found for this round.', 'error');
+      return;
+    }
+
+    // Branding Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(18);
+    doc.text("Dr. Mahalingam College of Engineering and Technology", 105, 15, { align: 'center' });
+    
+    doc.setFontSize(12);
+    doc.setTextColor(100);
+    doc.text("ECE Department Association - SPECTRUM", 105, 22, { align: 'center' });
+
+    doc.setDrawColor(200);
+    doc.line(20, 26, 190, 26);
+
+    doc.setFontSize(16);
+    doc.setTextColor(40, 44, 52);
+    doc.text(`EVALUATION REPORT - ROUND ${activeRoundNum}`, 105, 36, { align: 'center' });
+
+    doc.setFontSize(12);
+    doc.setTextColor(63, 81, 181);
+    doc.text(event?.title || 'Evaluation', 105, 43, { align: 'center' });
+
+    doc.setFontSize(9);
+    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 105, 50, { align: 'center' });
+
+    autoTable(doc, {
+      head: [tableColumn],
+      body: tableRows,
+      startY: 58,
+      theme: 'grid',
+      styles: { fontSize: 8, halign: 'center', valign: 'middle', cellPadding: 2 },
+      headStyles: { fillColor: [63, 81, 181], textColor: 255 },
+      columnStyles: {
+        1: { cellWidth: 35, halign: 'left', fontStyle: 'bold' }, // Team Name
+        2: { cellWidth: 40, halign: 'left' },                   // Members
+        3: { cellWidth: 30, halign: 'left' },                   // Judge
+        4: { cellWidth: 70, halign: 'left' }                    // Score & Remarks
+      },
+      didParseCell: function (data) {
+        if (data.section === 'body' && (data.column.index === 0 || data.column.index === 1 || data.column.index === 2)) {
+          const spanInfo = rowSpans.find(s => s.index === data.row.index);
+          if (spanInfo) {
+            data.cell.rowSpan = spanInfo.span;
+          }
+        }
+      }
+    });
+
+    doc.save(`${event?.title}_Round_${activeRoundNum}_Evaluation.pdf`);
+  };
+
   const handleEndAttendance = async () => {
     try {
       await axios.post(`${API_URL}/api/attendance/end`, { eventId: id }, { withCredentials: true });
@@ -503,6 +594,9 @@ const AdminParticipantManagement = () => {
             />
           </div>
           <button className="btn btn-outline btn-sm" onClick={generateODList}>📄 Export OD List (PDF)</button>
+          {isJuryRound && (
+            <button className="btn btn-accent btn-sm" onClick={generateEvaluationReport}>🏆 Export Evaluation Report</button>
+          )}
         </div>
       </header>
 
