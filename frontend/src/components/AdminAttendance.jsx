@@ -159,6 +159,15 @@ const AdminAttendance = () => {
       }
     });
 
+    // Add Note at the bottom
+    const finalY = doc.lastAutoTable.finalY + 10;
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(150, 0, 0); // Subtle red for the note
+    const noteText = "Note: The attendance is taken via the website. If the attendance log time is different, then the attendance was changed by an Admin due to errors.";
+    const splitNote = doc.splitTextToSize(noteText, 180);
+    doc.text(splitNote, 15, finalY);
+
     doc.save(`${event?.title}_Attendance_Report.pdf`);
   };
 
