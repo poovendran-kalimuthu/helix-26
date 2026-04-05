@@ -571,6 +571,8 @@ const AdminParticipantManagement = () => {
             </button>
           )}
 
+          <button className="btn btn-accent btn-sm" onClick={generateEvaluationReport}>🏆 Export Evaluation Report</button>
+          
           <div className="ae-search-box">
             <select 
               value={selectedDept} 
@@ -594,9 +596,6 @@ const AdminParticipantManagement = () => {
             />
           </div>
           <button className="btn btn-outline btn-sm" onClick={generateODList}>📄 Export OD List (PDF)</button>
-          {activeRoundNum !== null && (
-            <button className="btn btn-accent btn-sm" onClick={generateEvaluationReport}>🏆 Export Evaluation Report</button>
-          )}
         </div>
       </header>
 
