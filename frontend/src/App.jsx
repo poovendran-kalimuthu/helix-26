@@ -19,8 +19,9 @@ import ProjectSubmission from './components/ProjectSubmission';
 import AdminProjectReview from './components/AdminProjectReview';
 import Feedback from './components/Feedback';
 import AdminFeedback from './components/AdminFeedback';
+import AdminUsers from './components/AdminUsers';
+import AdminAuditLogs from './components/AdminAuditLogs';
 import ProtectedRoute from './components/ProtectedRoute';
-
 // Global config for OAuth persistence as requested by user
 axios.defaults.withCredentials = true;
 
@@ -84,6 +85,8 @@ function App() {
         <Route path="/admin/events/:id/attendance" element={<ProtectedRoute><AdminAttendance /></ProtectedRoute>} />
         <Route path="/admin/events/:id/project-review" element={<ProtectedRoute><AdminProjectReview /></ProtectedRoute>} />
         <Route path="/admin/feedback" element={<ProtectedRoute><AdminFeedback /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+        <Route path="/admin/audit" element={<ProtectedRoute><AdminAuditLogs /></ProtectedRoute>} />
         
         <Route path="/feedback" element={<ProtectedRoute><Feedback /></ProtectedRoute>} />
         

@@ -22,6 +22,7 @@ const eventSchema = new mongoose.Schema({
   rounds: { type: Number, default: 1 },           // total number of rounds (for backward compat)
   roundConfig: [roundConfigSchema],               // per-round evaluation config
   maxShortlisted: { type: Number, default: 0 },   // 0 means no limit
+  numberOfWinners: { type: Number, default: 3 },  // How many winners to select
   session: { type: String, enum: ['none', 'day1_morning', 'day1_afternoon', 'day2_morning'], default: 'none' },
   imageUrl: { type: String },
   isPublished: { type: Boolean, default: false },

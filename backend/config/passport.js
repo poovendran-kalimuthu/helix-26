@@ -17,10 +17,24 @@ passport.use(new GoogleStrategy({
   async (req, accessToken, refreshToken, profile, done) => {
     try {
       console.log("Google profile received:", profile.id, profile.emails[0]?.value);
-      // Check if user already exists in our db
-      let user = await User.findOne({ googleId: profile.id });
+      // Check if user already exists by googleId or email
+      let user = await User.findOne({ 
+        $or: [
+          { googleId: profile.id },
+          { email: profile.emails[0]?.value }
+        ]
+      });
 
       if (user) {
+        // Link googleId if it was manually created by an admin
+        if (!user.googleId) {
+          user.googleId = profile.id;
+          if (!user.profilePicture) {
+            user.profilePicture = profile.photos[0]?.value;
+          }
+          await user.save();
+        }
+
         const coordinators = [
           'sksanjay06052005@gmail.com',
           'mukesh.adcbe@gmail.com',

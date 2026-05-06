@@ -102,12 +102,13 @@ const AdminParticipantManagement = () => {
     const matchesDept = selectedDept === 'all' || reg.teamLeader?.department === selectedDept;
 
     if (!matchesSearch || !matchesDept) return false;
-    if (activeTab === 'all') return !reg.isShortlisted && reg.currentRound === 0 && !reg.isDisqualified;
-    if (activeTab === 'shortlisted') return reg.isShortlisted && !reg.isDisqualified;
+    if (activeTab === 'all') return !reg.isShortlisted && reg.currentRound === 0 && !reg.isDisqualified && !reg.isWinner;
+    if (activeTab === 'shortlisted') return reg.isShortlisted && !reg.isDisqualified && !reg.isWinner;
+    if (activeTab === 'winners') return reg.isWinner;
     if (activeTab === 'disqualified') return reg.isDisqualified;
     if (activeTab.startsWith('round-')) {
       const rn = parseInt(activeTab.split('-')[1]);
-      return reg.currentRound === rn && !reg.isDisqualified;
+      return reg.currentRound === rn && !reg.isDisqualified && !reg.isWinner;
     }
     return true;
   });
@@ -120,6 +121,8 @@ const AdminParticipantManagement = () => {
   const canRevert = nonDQ.filter(r => r.isShortlisted || r.currentRound > 0).length;
   const canDQ = selectedRegs.filter(r => !r.isDisqualified).length;
   const canReinstate = selectedRegs.filter(r => r.isDisqualified).length;
+  const canWin = nonDQ.filter(r => !r.isWinner).length;
+  const canUnwin = nonDQ.filter(r => r.isWinner).length;
 
   // Advance buttons — round N to N+1 (must be in exactly round N)
   const roundAdvanceButtons = [];
@@ -212,6 +215,17 @@ const AdminParticipantManagement = () => {
         ));
         setRegistrations(prev => prev.filter(r => !allSelected.includes(r._id)));
         showToast(`Deleted ${allSelected.length} registration(s).`);
+      } else if (type === 'winner' || type === 'unwinner') {
+        const isWinner = type === 'winner';
+        const eligible = allSelected.filter(sid => {
+          const r = registrations.find(x => x._id === sid);
+          return r && r.isWinner !== isWinner && !r.isDisqualified;
+        });
+        if (!eligible.length) { showToast(`No teams eligible to ${isWinner ? 'mark as winner' : 'remove winner status'}.`, 'error'); return; }
+        
+        await axios.post(`${API_URL}/api/admin/registrations/bulk-winners`, { regIds: eligible, isWinner }, { withCredentials: true });
+        setRegistrations(prev => prev.map(r => eligible.includes(r._id) ? { ...r, isWinner } : r));
+        showToast(`🏆 ${isWinner ? 'Marked' : 'Removed'} ${eligible.length} team(s) as winners.`);
       }
 
       setSelected(new Set());
@@ -509,12 +523,13 @@ const AdminParticipantManagement = () => {
   };
 
   const counts = {
-    all: registrations.filter(r => !r.isShortlisted && r.currentRound === 0 && !r.isDisqualified).length,
-    shortlisted: registrations.filter(r => r.isShortlisted && !r.isDisqualified).length,
+    all: registrations.filter(r => !r.isShortlisted && r.currentRound === 0 && !r.isDisqualified && !r.isWinner).length,
+    shortlisted: registrations.filter(r => r.isShortlisted && !r.isDisqualified && !r.isWinner).length,
+    winners: registrations.filter(r => r.isWinner).length,
     dq: registrations.filter(r => r.isDisqualified).length,
   };
   for (let i = 1; i <= (event?.rounds || 0); i++) {
-    counts[`round-${i}`] = registrations.filter(r => r.currentRound === i && !r.isDisqualified).length;
+    counts[`round-${i}`] = registrations.filter(r => r.currentRound === i && !r.isDisqualified && !r.isWinner).length;
   }
 
   // Active round config if tab is round-N
@@ -643,6 +658,16 @@ const AdminParticipantManagement = () => {
                 ✅ Reinstate <span className="ae-count-badge">{canReinstate}</span>
               </button>
             )}
+            {canWin > 0 && (
+              <button className="btn btn-sm" style={{ background: 'var(--accent)', color: '#000' }} disabled={actionLoading} onClick={() => runBulkAction('winner')}>
+                🏆 Mark Winners <span className="ae-count-badge">{canWin}</span>
+              </button>
+            )}
+            {canUnwin > 0 && (
+              <button className="btn btn-sm btn-ghost" disabled={actionLoading} onClick={() => runBulkAction('unwinner')}>
+                Remove Winners <span className="ae-count-badge">{canUnwin}</span>
+              </button>
+            )}
             <button className="btn btn-sm btn-danger" disabled={actionLoading} onClick={() => runBulkAction('delete')} style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
               Delete Selected
@@ -659,11 +684,13 @@ const AdminParticipantManagement = () => {
             { key: 'all', label: 'Registered Participants' },
             { key: 'shortlisted', label: 'Shortlisted' },
             ...[...Array(event?.rounds || 0)].map((_, i) => ({ key: `round-${i+1}`, label: `Round ${i+1}` })),
+            { key: 'winners', label: '🏆 Winners' },
             { key: 'disqualified', label: 'Disqualified', danger: true }
           ].map(tab => {
             const currentCount = counts[tab.key] !== undefined ? counts[tab.key] : counts.dq;
             let limit = null;
             if (tab.key === 'shortlisted' && event?.maxShortlisted > 0) limit = event.maxShortlisted;
+            if (tab.key === 'winners' && event?.numberOfWinners > 0) limit = event.numberOfWinners;
             if (tab.key.startsWith('round-')) {
               const rNum = parseInt(tab.key.split('-')[1]);
               const rCfg = event?.roundConfig?.find(rc => rc.roundNumber === rNum);
@@ -774,6 +801,8 @@ const AdminParticipantManagement = () => {
                       <div className="ae-status-stack">
                         {reg.isDisqualified ? (
                           <span className="badge badge-danger">Disqualified</span>
+                        ) : reg.isWinner ? (
+                          <span className="badge" style={{ background: 'var(--accent)', color: '#000' }}>🏆 Winner</span>
                         ) : reg.currentRound > 0 ? (
                           <>
                             <span className="badge badge-success">⭐ Shortlisted</span>

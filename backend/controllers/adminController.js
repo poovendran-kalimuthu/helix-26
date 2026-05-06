@@ -3,6 +3,8 @@ import Registration from '../models/Registration.js';
 import User from '../models/User.js';
 import Evaluator from '../models/Evaluator.js';
 import Score from '../models/Score.js';
+import AuditLog from '../models/AuditLog.js';
+import { logAudit } from '../utils/auditLogger.js';
 
 // @desc    Get dashboard analytics (counts)
 export const getAdminAnalytics = async (req, res) => {
@@ -27,7 +29,7 @@ export const getAdminAnalytics = async (req, res) => {
 // @desc    Create a new event
 export const createEvent = async (req, res) => {
   try {
-    const { title, description, date, location, teamSizeLimit, rounds, roundConfig, imageUrl, isPublished, isRegistrationOpen, isTeamChangeAllowed } = req.body;
+    const { title, description, date, location, teamSizeLimit, rounds, roundConfig, imageUrl, isPublished, isRegistrationOpen, isTeamChangeAllowed, numberOfWinners } = req.body;
     
     const event = await Event.create({
       title,
@@ -41,9 +43,11 @@ export const createEvent = async (req, res) => {
       isPublished: isPublished || false,
       isRegistrationOpen: isRegistrationOpen !== undefined ? isRegistrationOpen : true,
       isTeamChangeAllowed: isTeamChangeAllowed !== undefined ? isTeamChangeAllowed : true,
+      numberOfWinners: numberOfWinners || 3,
       createdBy: req.user._id
     });
     
+    await logAudit('CREATE_EVENT', `Created event: ${title}`, req.user._id, 'Event', event._id, req.body, req.ip, title);
     res.status(201).json({ success: true, event });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -55,6 +59,8 @@ export const updateEvent = async (req, res) => {
   try {
     const event = await Event.findByIdAndUpdate(req.params.id, req.body, { new: true });
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+    
+    await logAudit('UPDATE_EVENT', `Updated event: ${event.title}`, req.user._id, 'Event', event._id, req.body, req.ip, event.title);
     res.status(200).json({ success: true, event });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -76,6 +82,8 @@ export const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findByIdAndDelete(req.params.id);
     if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+    
+    await logAudit('DELETE_EVENT', `Deleted event: ${event.title}`, req.user._id, 'Event', req.params.id, { eventId: req.params.id, eventTitle: event.title }, req.ip, event.title);
     res.status(200).json({ success: true, message: 'Event deleted' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -120,6 +128,8 @@ export const toggleShortlist = async (req, res) => {
 
     reg.isShortlisted = willShortlist;
     await reg.save();
+    
+    await logAudit('TOGGLE_SHORTLIST', `${willShortlist ? 'Shortlisted' : 'Unshortlisted'} registration ${reg.teamName || reg._id}`, req.user._id, 'Registration', reg._id, { isShortlisted: willShortlist, registrationId: reg._id }, req.ip, reg.teamName || String(reg._id));
     res.status(200).json({ success: true, registration: reg });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -145,6 +155,8 @@ export const bulkShortlist = async (req, res) => {
     }
 
     await Registration.updateMany({ _id: { $in: regIds } }, { isShortlisted: shortlist });
+    
+    await logAudit('BULK_SHORTLIST', `Bulk ${shortlist ? 'shortlisted' : 'unshortlisted'} ${regIds.length} registrations`, req.user._id, 'Registration', null, { regIds, isShortlisted: shortlist }, req.ip, `Bulk (${regIds.length} teams)`);
     res.status(200).json({ success: true, message: `${regIds.length} registration(s) updated.` });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -171,6 +183,8 @@ export const updateRegistrationRound = async (req, res) => {
 
     reg.currentRound = round;
     await reg.save();
+    
+    await logAudit('UPDATE_ROUND', `Moved registration ${reg.teamName || reg._id} to Round ${round}`, req.user._id, 'Registration', reg._id, { round, registrationId: reg._id }, req.ip, reg.teamName || String(reg._id));
     res.status(200).json({ success: true, registration: reg });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -198,6 +212,8 @@ export const bulkUpdateRound = async (req, res) => {
     }
 
     await Registration.updateMany({ _id: { $in: regIds } }, { currentRound: round });
+    
+    await logAudit('BULK_UPDATE_ROUND', `Bulk moved ${regIds.length} registrations to Round ${round}`, req.user._id, 'Registration', null, { regIds, round }, req.ip, `Bulk (${regIds.length} teams)`);
     res.status(200).json({ success: true, message: `${regIds.length} registration(s) updated to Round ${round}.` });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -211,6 +227,8 @@ export const toggleDisqualify = async (req, res) => {
     if (!reg) return res.status(404).json({ success: false, message: 'Registration not found' });
     reg.isDisqualified = !reg.isDisqualified;
     await reg.save();
+    
+    await logAudit('TOGGLE_DISQUALIFY', `${reg.isDisqualified ? 'Disqualified' : 'Requalified'} registration ${reg.teamName || reg._id}`, req.user._id, 'Registration', reg._id, { isDisqualified: reg.isDisqualified, registrationId: reg._id }, req.ip, reg.teamName || String(reg._id));
     res.status(200).json({ success: true, registration: reg });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -229,7 +247,64 @@ export const revertRound = async (req, res) => {
       reg.isShortlisted = false;
     }
     await reg.save();
+    
+    await logAudit('REVERT_ROUND', `Reverted registration ${reg.teamName || reg._id} to Round ${reg.currentRound}`, req.user._id, 'Registration', reg._id, { round: reg.currentRound, isShortlisted: reg.isShortlisted, registrationId: reg._id }, req.ip, reg.teamName || String(reg._id));
     res.status(200).json({ success: true, registration: reg });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+// @desc    Toggle winner status of one registration
+export const toggleWinner = async (req, res) => {
+  try {
+    const reg = await Registration.findById(req.params.regId);
+    if (!reg) return res.status(404).json({ success: false, message: 'Registration not found' });
+    
+    const willBeWinner = !reg.isWinner;
+    
+    if (willBeWinner) {
+      const event = await Event.findById(reg.event);
+      if (event?.numberOfWinners > 0) {
+        const currentWinners = await Registration.countDocuments({ event: reg.event, isWinner: true });
+        if (currentWinners >= event.numberOfWinners) {
+          return res.status(400).json({ success: false, message: `Winner limit reached (Max ${event.numberOfWinners}).` });
+        }
+      }
+    }
+
+    reg.isWinner = willBeWinner;
+    await reg.save();
+    
+    await logAudit('TOGGLE_WINNER', `${willBeWinner ? 'Marked as Winner' : 'Removed Winner status for'} registration ${reg.teamName || reg._id}`, req.user._id, 'Registration', reg._id, { isWinner: willBeWinner, registrationId: reg._id }, req.ip, reg.teamName || String(reg._id));
+    res.status(200).json({ success: true, registration: reg });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+// @desc    Bulk select winners
+export const bulkSelectWinners = async (req, res) => {
+  try {
+    const { regIds, isWinner } = req.body;
+    
+    if (isWinner && regIds.length > 0) {
+      const firstReg = await Registration.findById(regIds[0]);
+      if (firstReg) {
+        const event = await Event.findById(firstReg.event);
+        if (event?.numberOfWinners > 0) {
+          const currentWinners = await Registration.countDocuments({ event: firstReg.event, isWinner: true, _id: { $nin: regIds } });
+          if (currentWinners + regIds.length > event.numberOfWinners) {
+            return res.status(400).json({ success: false, message: `Selecting these teams would exceed winner limit (Max ${event.numberOfWinners}, currently ${currentWinners} winners).` });
+          }
+        }
+      }
+    }
+
+    await Registration.updateMany({ _id: { $in: regIds } }, { isWinner });
+    
+    await logAudit('BULK_WINNERS', `Bulk ${isWinner ? 'marked as winners' : 'removed winner status for'} ${regIds.length} registrations`, req.user._id, 'Registration', null, { regIds, isWinner }, req.ip, `Bulk (${regIds.length} teams)`);
+    res.status(200).json({ success: true, message: `${regIds.length} registration(s) updated.` });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });
   }
@@ -275,6 +350,7 @@ export const createEvaluator = async (req, res) => {
       .populate('assignedRounds.event', 'title')
       .populate('createdBy', 'name');
 
+    await logAudit('CREATE_EVALUATOR', `Created evaluator: ${name}`, req.user._id, 'Evaluator', evaluator._id, { email, phone, assignedRounds }, req.ip, name);
     res.status(201).json({ success: true, evaluator: populatedEvaluator });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
@@ -288,7 +364,64 @@ export const deleteEvaluator = async (req, res) => {
     if (!evaluator) {
       return res.status(404).json({ success: false, message: 'Evaluator not found' });
     }
+    
+    await logAudit('DELETE_EVALUATOR', `Deleted evaluator: ${evaluator.name}`, req.user._id, 'Evaluator', req.params.id, { evaluatorId: req.params.id, evaluatorName: evaluator.name }, req.ip, evaluator.name);
     res.status(200).json({ success: true, message: 'Evaluator deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+/* =========================================
+   USER MANAGEMENT & AUDIT LOGS
+   ========================================= */
+
+// @desc    Get all users
+export const getUsers = async (req, res) => {
+  try {
+    const users = await User.find().sort('-createdAt').select('-googleId');
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+// @desc    Create a user manually
+export const createUser = async (req, res) => {
+  try {
+    const { name, email, role, department, year } = req.body;
+    
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ success: false, message: 'User with this email already exists' });
+    }
+
+    const user = await User.create({
+      name,
+      email,
+      role: role || 'user',
+      department,
+      year,
+      isProfileComplete: true // Assuming admin creation means basic info is sufficient
+    });
+
+    await logAudit('CREATE_USER', `Created new user: ${email} with role ${role}`, req.user._id, 'User', user._id, { email, role, department, year }, req.ip, name || email);
+    
+    res.status(201).json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+// @desc    Get audit logs
+export const getAuditLogs = async (req, res) => {
+  try {
+    const logs = await AuditLog.find()
+      .populate('user', 'name email role')
+      .sort('-createdAt')
+      .limit(200); // Limit to last 200 logs
+      
+    res.status(200).json({ success: true, logs });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
@@ -302,7 +435,21 @@ export const deleteRegistration = async (req, res) => {
     // Also delete any scores associated with this registration if necessary
     await Score.deleteMany({ registration: req.params.regId });
     
+    await logAudit('DELETE_REGISTRATION', `Deleted registration for event`, req.user._id, 'Registration', req.params.regId, { registrationId: req.params.regId }, req.ip, String(req.params.regId));
     res.status(200).json({ success: true, message: 'Registration deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};
+
+// @desc    Delete a user
+export const deleteUser = async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    
+    await logAudit('DELETE_USER', `Deleted user: ${user.name || user.email}`, req.user._id, 'User', req.params.id, { userId: req.params.id, email: user.email }, req.ip, user.name || user.email);
+    res.status(200).json({ success: true, message: 'User deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }

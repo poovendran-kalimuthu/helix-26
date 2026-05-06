@@ -13,6 +13,7 @@ const registrationSchema = new mongoose.Schema({
   isShortlisted: { type: Boolean, default: false },
   isDisqualified: { type: Boolean, default: false },
   currentRound: { type: Number, default: 0 },
+  isWinner: { type: Boolean, default: false },
   attendance: [{
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     round: { type: Number, required: true },

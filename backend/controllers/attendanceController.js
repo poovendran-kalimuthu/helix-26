@@ -1,6 +1,7 @@
 import Event from '../models/Event.js';
 import Registration from '../models/Registration.js';
 import crypto from 'crypto';
+import { logAudit } from '../utils/auditLogger.js';
 
 // @desc    Start an attendance session for a round
 export const startAttendance = async (req, res) => {
@@ -128,6 +129,9 @@ export const manualMark = async (req, res) => {
     }
 
     await registration.save();
+    
+    await logAudit('MARK_ATTENDANCE', `Manually marked attendance for user ${userId} in Round ${round}`, req.user._id, 'Registration', registrationId, { userId, round, status, registrationId }, req.ip, registration.teamName || String(registration._id));
+    
     const updated = await Registration.findById(registrationId)
       .populate('teamLeader', 'name registerNumber department')
       .populate('members.user', 'name registerNumber');
@@ -185,7 +189,10 @@ export const markByAdminScan = async (req, res) => {
     });
 
     await registration.save();
-    res.status(200).json({ success: true, message: `Checked in ${registration.teamName} for Round ${roundNum}` });
+    
+    await logAudit('ADMIN_SCAN_ATTENDANCE', `Admin scanned and marked attendance for ${registration.teamName || registration._id} in Round ${roundNum}`, req.user._id, 'Registration', registrationId, { userId, round: roundNum, eventId, registrationId }, req.ip, registration.teamName || String(registration._id));
+    
+    res.status(200).json({ success: true, message: `Checked in ${registration.teamName || 'team'} for Round ${roundNum}` });
   } catch (error) {
     console.error('[Admin Scan Error]', error);
     res.status(500).json({ success: false, message: 'Server Error' });
