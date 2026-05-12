@@ -267,6 +267,16 @@ const EventDetails = () => {
                   {eventData.location}
                 </div>
               </div>
+
+              <div style={{ marginTop: '1.5rem' }}>
+                <button 
+                  className="btn btn-accent" 
+                  onClick={() => navigate(`/events/${id}/winners`)}
+                  style={{ background: 'var(--accent)', color: '#000', fontWeight: 'bold', border: 'none', boxShadow: '0 4px 15px rgba(79, 209, 197, 0.4)' }}
+                >
+                  🏆 View Winners Board
+                </button>
+              </div>
             </div>
 
           </div>

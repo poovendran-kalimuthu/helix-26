@@ -223,8 +223,17 @@ const AdminParticipantManagement = () => {
         });
         if (!eligible.length) { showToast(`No teams eligible to ${isWinner ? 'mark as winner' : 'remove winner status'}.`, 'error'); return; }
         
-        await axios.post(`${API_URL}/api/admin/registrations/bulk-winners`, { regIds: eligible, isWinner }, { withCredentials: true });
-        setRegistrations(prev => prev.map(r => eligible.includes(r._id) ? { ...r, isWinner } : r));
+        let position = '';
+        if (isWinner) {
+          position = prompt("Enter Winner Position (e.g., 1st, 2nd, Runner-Up):", "");
+          if (position === null) {
+            setActionLoading(false);
+            return; // User cancelled
+          }
+        }
+
+        await axios.post(`${API_URL}/api/admin/registrations/bulk-winners`, { regIds: eligible, isWinner, position }, { withCredentials: true });
+        setRegistrations(prev => prev.map(r => eligible.includes(r._id) ? { ...r, isWinner, winnerPosition: isWinner ? position : '' } : r));
         showToast(`🏆 ${isWinner ? 'Marked' : 'Removed'} ${eligible.length} team(s) as winners.`);
       }
 
@@ -760,6 +769,7 @@ const AdminParticipantManagement = () => {
                         <div className="ae-team-header">
                           <strong>{reg.teamName || 'Unnamed Team'}</strong>
                           {reg.isDisqualified && <span className="badge badge-danger">🚫 DQ</span>}
+                          {reg.isWinner && reg.winnerPosition && <span className="badge" style={{ background: 'var(--accent)', color: '#000', marginLeft: '6px' }}>🏆 {reg.winnerPosition}</span>}
                         </div>
                         <div className="ae-member-pills">
                           {reg.members.map((m, idx) => (

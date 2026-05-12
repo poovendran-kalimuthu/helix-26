@@ -286,7 +286,7 @@ export const toggleWinner = async (req, res) => {
 // @desc    Bulk select winners
 export const bulkSelectWinners = async (req, res) => {
   try {
-    const { regIds, isWinner } = req.body;
+    const { regIds, isWinner, position } = req.body;
     
     if (isWinner && regIds.length > 0) {
       const firstReg = await Registration.findById(regIds[0]);
@@ -301,9 +301,16 @@ export const bulkSelectWinners = async (req, res) => {
       }
     }
 
-    await Registration.updateMany({ _id: { $in: regIds } }, { isWinner });
+    const updateData = { isWinner };
+    if (isWinner && position) {
+      updateData.winnerPosition = position;
+    } else if (!isWinner) {
+      updateData.winnerPosition = '';
+    }
+
+    await Registration.updateMany({ _id: { $in: regIds } }, updateData);
     
-    await logAudit('BULK_WINNERS', `Bulk ${isWinner ? 'marked as winners' : 'removed winner status for'} ${regIds.length} registrations`, req.user._id, 'Registration', null, { regIds, isWinner }, req.ip, `Bulk (${regIds.length} teams)`);
+    await logAudit('BULK_WINNERS', `Bulk ${isWinner ? 'marked as winners' : 'removed winner status for'} ${regIds.length} registrations`, req.user._id, 'Registration', null, { regIds, isWinner, position }, req.ip, `Bulk (${regIds.length} teams)`);
     res.status(200).json({ success: true, message: `${regIds.length} registration(s) updated.` });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server Error' });

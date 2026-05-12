@@ -35,6 +35,24 @@ export const getEventDetails = async (req, res) => {
   }
 };
 
+// @desc    Get event winners
+export const getEventWinners = async (req, res) => {
+  try {
+    const event = await Event.findById(req.params.id).select('title description imageUrl date location');
+    if (!event) return res.status(404).json({ success: false, message: 'Event not found' });
+
+    const winners = await Registration.find({ event: req.params.id, isWinner: true })
+      .populate('teamLeader', 'name email profilePicture department')
+      .populate('members.user', 'name email profilePicture department')
+      .sort('winnerPosition'); // Sort by position if applicable
+
+    res.status(200).json({ success: true, event, winners });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
 // @desc    Register user and their team to event
 export const registerForEvent = async (req, res) => {
   try {
