@@ -461,3 +461,48 @@ export const deleteUser = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server Error', error: error.message });
   }
 };
+
+// @desc    Update a user (Admin only)
+export const updateUser = async (req, res) => {
+  try {
+    const { name, email, role, department, year, registerNumber, mobile, isProfileComplete } = req.body;
+    
+    if (email) {
+      const existingUser = await User.findOne({ email, _id: { $ne: req.params.id } });
+      if (existingUser) {
+        return res.status(400).json({ success: false, message: 'Another user with this email already exists' });
+      }
+    }
+
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+
+    const previousRole = user.role;
+    
+    if (name !== undefined) user.name = name;
+    if (email !== undefined) user.email = email;
+    if (role !== undefined) user.role = role;
+    if (department !== undefined) user.department = department;
+    if (year !== undefined) user.year = year;
+    if (registerNumber !== undefined) user.registerNumber = registerNumber;
+    if (mobile !== undefined) user.mobile = mobile;
+    if (isProfileComplete !== undefined) user.isProfileComplete = isProfileComplete;
+
+    await user.save();
+
+    await logAudit(
+      'UPDATE_USER',
+      `Updated user: ${user.email} (Role changed from ${previousRole} to ${user.role})`,
+      req.user._id,
+      'User',
+      user._id,
+      { email: user.email, role: user.role, department: user.department, year: user.year },
+      req.ip,
+      user.name || user.email
+    );
+
+    res.status(200).json({ success: true, user });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server Error', error: error.message });
+  }
+};

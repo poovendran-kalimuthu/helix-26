@@ -1,5 +1,5 @@
 import express from 'express';
-import { createEvent, updateEvent, getAdminEvents, deleteEvent, getEventRegistrations, toggleShortlist, bulkShortlist, updateRegistrationRound, bulkUpdateRound, getAdminAnalytics, toggleDisqualify, revertRound, getEvaluators, createEvaluator, deleteEvaluator, deleteRegistration, getUsers, createUser, getAuditLogs, deleteUser, bulkSelectWinners, toggleWinner } from '../controllers/adminController.js';
+import { createEvent, updateEvent, getAdminEvents, deleteEvent, getEventRegistrations, toggleShortlist, bulkShortlist, updateRegistrationRound, bulkUpdateRound, getAdminAnalytics, toggleDisqualify, revertRound, getEvaluators, createEvaluator, deleteEvaluator, deleteRegistration, getUsers, createUser, getAuditLogs, deleteUser, updateUser, bulkSelectWinners, toggleWinner } from '../controllers/adminController.js';
 import { protect, adminProtect, coordinatorProtect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
@@ -34,6 +34,7 @@ router.delete('/evaluators/:id', protect, coordinatorProtect, deleteEvaluator);
 // Users and Audit Logs (Admin only)
 router.get('/users', protect, adminProtect, getUsers);
 router.post('/users', protect, adminProtect, createUser);
+router.put('/users/:id', protect, adminProtect, updateUser);
 router.delete('/users/:id', protect, adminProtect, deleteUser);
 router.get('/audit-logs', protect, adminProtect, getAuditLogs);
 
